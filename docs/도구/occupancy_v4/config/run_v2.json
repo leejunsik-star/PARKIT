@@ -1,0 +1,78 @@
+{
+ "_설명": "PARKIT 점유 판정 실행 설정 (보정 ver2용). run.json과 같고, 카메라 설정이 config/v2/ 에 있으며 ref_lines(기준선 목록)와 autoref(기준점 자동 찾기 설정)를 더했다. 원본 occupancy.py는 ref_lines, autoref를 읽지 않는다. 항목 뜻은 docs/28 5절, ver2 항목은 docs/32",
+ "slot_table": [
+  "../../../칸표_매트좌표_초안.json",
+  "../data/칸표_매트좌표_초안.json"
+ ],
+ "ref_lines": "../data/기준선_매트.json",
+ "model": [
+  "../../models/M8.pt",
+  "../models/M8.pt"
+ ],
+ "conf": 0.25,
+ "imgsz": 640,
+ "analyze_every_frames": 15,
+ "view_all_frames": true,
+ "calib": {
+  "hfov_deg": 50.0,
+  "auto_margin_px": 0
+ },
+ "cameras": [
+  {
+   "config": "v2/cam_CAM-1.json",
+   "width": 1920,
+   "height": 1080
+  }
+ ],
+ "params": {
+  "zone_margin_entrance_cm": 1.0,
+  "zone_margin_back_cm": 1.0,
+  "expect_max_dist_cm": 2.0,
+  "car_width_cm": 3.2,
+  "car_length_cm": 6.5,
+  "car_height_cm": 2.0,
+  "straddle_min_cm": 1.0,
+  "cut_overlap_ratio": 0.5,
+  "side_overlap_ratio": 0.1,
+  "cut_touch_ratio": 0.01,
+  "occluder_depth_cm": 3.2,
+  "occlusion_ratio": 0.3,
+  "occlusion_height_cm": 2.0,
+  "t_occupied_s": 3.0,
+  "t_empty_s": 5.0,
+  "t_blind_s": 1.0,
+  "t_stale_s": 2.0,
+  "t_offline_s": 30.0
+ },
+ "overrides": {
+  "rows": {},
+  "slots": {}
+ },
+ "presets": {
+  "demo": {
+   "t_occupied_s": 1.0,
+   "t_empty_s": 2.0
+  }
+ },
+ "display": {
+  "plan_px_per_cm": 10,
+  "startup_overlay_s": 5.0
+ },
+ "log": {
+  "frames": false,
+  "record": false,
+  "dir": "../logs"
+ },
+ "autoref": {
+  "_설명": "기준점 자동 찾기 설정. 비우면 parkit_autoref.py의 DEFAULTS. 매트 단위(cm) 값: search, floor_clear, manual_warn",
+  "search": [
+   2.0,
+   1.0,
+   0.5
+  ],
+  "manual_warn": 1.0,
+  "min_auto_points": 4,
+  "min_total_points": 8,
+  "use_ambiguous": true
+ }
+}
