@@ -1,0 +1,16 @@
+{
+  "date": "2026-11-03",
+  "baseline_geometry": "35/35",
+  "baseline_pipeline": "33/33",
+  "regression_geometry": "35/35",
+  "regression_pipeline": "33/33",
+  "vehicle_tests": 15,
+  "api_engine_tests": 5,
+  "replay_tests": 1,
+  "replay_rows_matched": 107,
+  "frontend_tests": 5,
+  "production_build": "passed",
+  "tkinter_gt_smoke": "passed",
+  "actual_camera_validation": false,
+  "actual_detector_validation": false
+}

@@ -1,0 +1,310 @@
+{
+  "_meta": {
+    "description": "PARKIT 2학기 DB 스키마(docs/02_DB스키마.md) 테스트용 샘플 데이터. 실제 Firebase에는 반영하지 않음.",
+    "schemaVersion": 2,
+    "createdAt": "2026-10-07",
+    "notes": [
+      "firestore 아래 키는 '컬렉션/문서ID' 경로 구조를 그대로 표현한 것입니다.",
+      "Timestamp 필드는 ISO-8601 문자열로 적었습니다. 실제 저장 시 Firestore Timestamp(serverTimestamp)로 넣습니다.",
+      "location은 GeoPoint로 저장합니다. 여기서는 {latitude, longitude}로 표기했습니다.",
+      "좌표 단위는 모두 미터, 원점은 도면 이미지 왼쪽 위, x는 오른쪽, y는 아래쪽입니다.",
+      "homography 값은 형식 확인용 더미 값입니다. 실제 카메라 보정값이 아닙니다."
+    ]
+  },
+  "firestore": {
+    "parkingLots": {
+      "lot_demo_01": {
+        "name": "PARKIT 테스트 주차장",
+        "address": "서울특별시 중구 세종대로 110",
+        "location": { "latitude": 37.5665, "longitude": 126.978 },
+        "category": "public",
+        "feeType": "paid",
+        "ownerUid": "admin_uid_demo",
+        "extendedMode": true,
+        "schemaVersion": 2,
+        "summary": {
+          "all": { "total": 8, "empty": 4, "occupied": 2, "staticBlind": 1, "dynamicBlind": 1 },
+          "byType": {
+            "NORMAL":   { "total": 4, "empty": 1, "occupied": 2, "staticBlind": 1, "dynamicBlind": 0 },
+            "EV":       { "total": 1, "empty": 1, "occupied": 0, "staticBlind": 0, "dynamicBlind": 0 },
+            "COMPACT":  { "total": 1, "empty": 1, "occupied": 0, "staticBlind": 0, "dynamicBlind": 0 },
+            "HANDICAP": { "total": 1, "empty": 1, "occupied": 0, "staticBlind": 0, "dynamicBlind": 0 },
+            "WOMAN":    { "total": 1, "empty": 0, "occupied": 0, "staticBlind": 0, "dynamicBlind": 1 },
+            "PATRIOT":  { "total": 0, "empty": 0, "occupied": 0, "staticBlind": 0, "dynamicBlind": 0 }
+          },
+          "updatedAt": "2026-10-07T03:10:05Z"
+        },
+        "updatedAt": "2026-10-07T03:10:05Z",
+        "floors": {
+          "B1": {
+            "name": "B1층",
+            "order": 1,
+            "planUrl": "https://firebasestorage.googleapis.com/v0/b/demo/o/lot_demo_01%2FB1_empty.png",
+            "planImageWidthPx": 2000,
+            "planImageHeightPx": 1000,
+            "widthM": 40.0,
+            "heightM": 20.0,
+            "spotOpacity": 0.6,
+            "updatedAt": "2026-10-07T03:00:00Z"
+          }
+        },
+        "cameras": {
+          "CAM-01": {
+            "name": "B1 북측 고정 CCTV",
+            "floorId": "B1",
+            "kind": "FIXED_CCTV",
+            "imageWidthPx": 1920,
+            "imageHeightPx": 1080,
+            "views": [
+              {
+                "viewId": "main",
+                "yawDeg": 0,
+                "fovDeg": 90,
+                "homography": [0.0123, 0.0021, -1.5, 0.0004, 0.031, -4.2, 0.00001, 0.00042, 1.0]
+              }
+            ],
+            "status": "ONLINE",
+            "lastHeartbeatAt": "2026-10-07T03:10:00Z",
+            "calibratedAt": "2026-10-06T10:00:00Z",
+            "updatedAt": "2026-10-06T10:00:00Z"
+          },
+          "CAM-02": {
+            "name": "B1 통로 360도 카메라",
+            "floorId": "B1",
+            "kind": "PANORAMA_360",
+            "imageWidthPx": 3840,
+            "imageHeightPx": 1920,
+            "views": [
+              {
+                "viewId": "south",
+                "yawDeg": 180,
+                "fovDeg": 100,
+                "homography": [0.0098, -0.0012, 3.1, 0.0002, 0.0275, 9.8, 0.00002, 0.00038, 1.0]
+              },
+              {
+                "viewId": "east",
+                "yawDeg": 90,
+                "fovDeg": 100,
+                "homography": [0.0101, 0.0009, 18.4, -0.0003, 0.0262, 6.5, 0.00001, 0.00035, 1.0]
+              }
+            ],
+            "status": "ONLINE",
+            "lastHeartbeatAt": "2026-10-07T03:10:01Z",
+            "calibratedAt": "2026-10-06T10:30:00Z",
+            "updatedAt": "2026-10-06T10:30:00Z"
+          }
+        },
+        "spots": {
+          "B1-A-01": {
+            "label": "A-01",
+            "floorId": "B1",
+            "type": "NORMAL",
+            "polygon": [ { "x": 5.0, "y": 0.0 }, { "x": 7.5, "y": 0.0 }, { "x": 7.5, "y": 5.0 }, { "x": 5.0, "y": 5.0 } ],
+            "center": { "x": 6.25, "y": 2.5 },
+            "headingDeg": 0,
+            "cameraIds": ["CAM-01"],
+            "primaryCameraId": "CAM-01",
+            "status": "EMPTY",
+            "statusSource": "EDGE",
+            "confidence": 0.94,
+            "lastKnownStatus": null,
+            "blindReason": null,
+            "blindSince": null,
+            "occludedByTrackId": null,
+            "legacySpotId": null,
+            "updatedAt": "2026-10-07T03:05:12Z"
+          },
+          "B1-A-02": {
+            "label": "A-02",
+            "floorId": "B1",
+            "type": "NORMAL",
+            "polygon": [ { "x": 7.5, "y": 0.0 }, { "x": 10.0, "y": 0.0 }, { "x": 10.0, "y": 5.0 }, { "x": 7.5, "y": 5.0 } ],
+            "center": { "x": 8.75, "y": 2.5 },
+            "headingDeg": 0,
+            "cameraIds": ["CAM-01"],
+            "primaryCameraId": "CAM-01",
+            "status": "OCCUPIED",
+            "statusSource": "EDGE",
+            "confidence": 0.97,
+            "lastKnownStatus": null,
+            "blindReason": null,
+            "blindSince": null,
+            "occludedByTrackId": null,
+            "legacySpotId": null,
+            "updatedAt": "2026-10-07T02:48:30Z"
+          },
+          "B1-A-03": {
+            "label": "A-03",
+            "floorId": "B1",
+            "type": "WOMAN",
+            "polygon": [ { "x": 10.0, "y": 0.0 }, { "x": 12.5, "y": 0.0 }, { "x": 12.5, "y": 5.0 }, { "x": 10.0, "y": 5.0 } ],
+            "center": { "x": 11.25, "y": 2.5 },
+            "headingDeg": 0,
+            "cameraIds": ["CAM-01"],
+            "primaryCameraId": "CAM-01",
+            "status": "DYNAMIC_BLIND",
+            "statusSource": "EDGE",
+            "confidence": null,
+            "lastKnownStatus": "EMPTY",
+            "blindReason": "OCCLUDED",
+            "blindSince": "2026-10-07T03:09:58Z",
+            "occludedByTrackId": "trk_0012",
+            "legacySpotId": null,
+            "updatedAt": "2026-10-07T03:09:58Z"
+          },
+          "B1-A-04": {
+            "label": "A-04",
+            "floorId": "B1",
+            "type": "EV",
+            "polygon": [ { "x": 12.5, "y": 0.0 }, { "x": 15.0, "y": 0.0 }, { "x": 15.0, "y": 5.0 }, { "x": 12.5, "y": 5.0 } ],
+            "center": { "x": 13.75, "y": 2.5 },
+            "headingDeg": 0,
+            "cameraIds": ["CAM-01", "CAM-02"],
+            "primaryCameraId": "CAM-01",
+            "status": "EMPTY",
+            "statusSource": "EDGE",
+            "confidence": 0.91,
+            "lastKnownStatus": null,
+            "blindReason": null,
+            "blindSince": null,
+            "occludedByTrackId": null,
+            "legacySpotId": null,
+            "updatedAt": "2026-10-07T03:01:44Z"
+          },
+          "B1-B-01": {
+            "label": "B-01",
+            "floorId": "B1",
+            "type": "NORMAL",
+            "polygon": [ { "x": 5.0, "y": 15.0 }, { "x": 7.5, "y": 15.0 }, { "x": 7.5, "y": 20.0 }, { "x": 5.0, "y": 20.0 } ],
+            "center": { "x": 6.25, "y": 17.5 },
+            "headingDeg": 180,
+            "cameraIds": ["CAM-02"],
+            "primaryCameraId": "CAM-02",
+            "status": "OCCUPIED",
+            "statusSource": "EDGE",
+            "confidence": 0.95,
+            "lastKnownStatus": null,
+            "blindReason": null,
+            "blindSince": null,
+            "occludedByTrackId": null,
+            "legacySpotId": null,
+            "updatedAt": "2026-10-07T02:30:10Z"
+          },
+          "B1-B-02": {
+            "label": "B-02",
+            "floorId": "B1",
+            "type": "COMPACT",
+            "polygon": [ { "x": 7.5, "y": 15.5 }, { "x": 9.8, "y": 15.5 }, { "x": 9.8, "y": 20.0 }, { "x": 7.5, "y": 20.0 } ],
+            "center": { "x": 8.65, "y": 17.75 },
+            "headingDeg": 180,
+            "cameraIds": ["CAM-02"],
+            "primaryCameraId": "CAM-02",
+            "status": "EMPTY",
+            "statusSource": "EDGE",
+            "confidence": 0.89,
+            "lastKnownStatus": null,
+            "blindReason": null,
+            "blindSince": null,
+            "occludedByTrackId": null,
+            "legacySpotId": null,
+            "updatedAt": "2026-10-07T03:07:21Z"
+          },
+          "B1-B-03": {
+            "label": "B-03",
+            "floorId": "B1",
+            "type": "HANDICAP",
+            "polygon": [ { "x": 9.8, "y": 15.0 }, { "x": 13.1, "y": 15.0 }, { "x": 13.1, "y": 20.0 }, { "x": 9.8, "y": 20.0 } ],
+            "center": { "x": 11.45, "y": 17.5 },
+            "headingDeg": 180,
+            "cameraIds": ["CAM-02"],
+            "primaryCameraId": "CAM-02",
+            "status": "EMPTY",
+            "statusSource": "EDGE",
+            "confidence": 0.93,
+            "lastKnownStatus": null,
+            "blindReason": null,
+            "blindSince": null,
+            "occludedByTrackId": null,
+            "legacySpotId": null,
+            "updatedAt": "2026-10-07T02:55:02Z"
+          },
+          "B1-B-04": {
+            "label": "B-04",
+            "floorId": "B1",
+            "type": "NORMAL",
+            "polygon": [ { "x": 13.1, "y": 15.0 }, { "x": 15.6, "y": 15.0 }, { "x": 15.6, "y": 20.0 }, { "x": 13.1, "y": 20.0 } ],
+            "center": { "x": 14.35, "y": 17.5 },
+            "headingDeg": 180,
+            "cameraIds": [],
+            "primaryCameraId": null,
+            "status": "STATIC_BLIND",
+            "statusSource": "CONFIG",
+            "confidence": null,
+            "lastKnownStatus": null,
+            "blindReason": "NO_COVERAGE",
+            "blindSince": "2026-10-06T10:30:00Z",
+            "occludedByTrackId": null,
+            "legacySpotId": null,
+            "updatedAt": "2026-10-06T10:30:00Z"
+          }
+        }
+      }
+    },
+    "users": {
+      "user_uid_demo": {
+        "name": "테스트 사용자",
+        "email": "demo@example.com",
+        "carInfo": {
+          "isCompactCar": false,
+          "isElectricCar": true,
+          "isDisabled": false,
+          "isNationalMeritRecipient": false,
+          "canUseFemaleParking": false
+        },
+        "favorites": ["lot_demo_01"],
+        "myParking": {
+          "lotId": "lot_demo_01",
+          "floorId": "B1",
+          "spotId": "B1-B-01",
+          "savedAt": "2026-10-07T02:31:00Z"
+        }
+      }
+    }
+  },
+  "realtimeDatabase": {
+    "tracks": {
+      "lot_demo_01": {
+        "B1": {
+          "trk_0012": {
+            "x": 11.4,
+            "y": 7.2,
+            "heading": 90.0,
+            "type": "TRUCK",
+            "color": "WHITE",
+            "lengthM": 7.5,
+            "widthM": 2.4,
+            "cameraId": "CAM-02",
+            "ts": 1791342598000
+          },
+          "trk_0015": {
+            "x": 24.8,
+            "y": 10.1,
+            "heading": 270.0,
+            "type": "CAR",
+            "color": "BLACK",
+            "lengthM": 4.6,
+            "widthM": 1.8,
+            "cameraId": "CAM-02",
+            "ts": 1791342600000
+          }
+        }
+      }
+    },
+    "edgeStatus": {
+      "lot_demo_01": {
+        "CAM-01": { "online": true, "fps": 12.0, "ts": 1791342600000 },
+        "CAM-02": { "online": true, "fps": 10.0, "ts": 1791342601000 }
+      }
+    }
+  }
+}

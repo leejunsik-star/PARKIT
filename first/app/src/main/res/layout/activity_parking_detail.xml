@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F8F9FA"
+    android:padding="16dp">
+
+    <!-- 상단 헤더 카드 영역 -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="#FFFFFF">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="6dp">
+
+                <TextView
+                    android:id="@+id/tv_detail_name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="주차장명 로딩 중..."
+                    android:textColor="#1A1D20"
+                    android:textSize="18sp"
+                    android:textStyle="bold"/>
+
+                <!-- 상세보기 화면 길찾기 버튼 -->
+                <Button
+                    android:id="@+id/btn_detail_navi"
+                    android:layout_width="80dp"
+                    android:layout_height="30dp"
+                    android:background="@drawable/bg_navi_button"
+                    android:text="길찾기"
+                    android:textColor="#4361EE"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:paddingHorizontal="0dp"
+                    android:paddingVertical="0dp"
+                    android:layout_marginRight="4dp"
+                    style="?android:attr/buttonStyleSmall"/>
+
+                <ImageButton
+                    android:id="@+id/ib_detail_favorite"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_star_border"
+                    android:contentDescription="즐겨찾기"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tv_detail_category"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-"
+                    android:textColor="#495057"
+                    android:textSize="13sp"
+                    android:background="#E9ECEF"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="3dp"
+                    android:layout_marginRight="8dp"/>
+
+                <TextView
+                    android:id="@+id/tv_detail_fee_type"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-"
+                    android:textColor="#495057"
+                    android:textSize="13sp"
+                    android:background="#E9ECEF"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="3dp"/>
+            </LinearLayout>
+
+            <!-- 층 선택 Spinner 영역 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="층 선택:"
+                    android:textColor="#495057"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:layout_marginRight="8dp"/>
+
+                <Spinner
+                    android:id="@+id/spinner_floor"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:spinnerMode="dropdown"/>
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- 평면도 도면 렌더링 뷰 (ParkingMapView) -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginBottom="0dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="2dp"
+        app:cardBackgroundColor="#FFFFFF">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#FFFFFF">
+
+            <!-- 실시간 도면 뷰 -->
+            <com.example.myapplication.ParkingMapView
+                android:id="@+id/parking_map_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <TextView
+                android:layout_gravity="bottom|right"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="💡 드래그하여 이동 / 두 손가락으로 줌인·줌아웃"
+                android:textColor="#6C757D"
+                android:textSize="11sp"
+                android:layout_margin="12dp"/>
+        </FrameLayout>
+    </androidx.cardview.widget.CardView>
+
+</LinearLayout>

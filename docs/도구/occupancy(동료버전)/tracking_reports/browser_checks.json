@@ -1,0 +1,19 @@
+{
+  "input": "synthetic observations (no actual CCTV or detector)",
+  "checks": {
+    "56_slots_rendered": true,
+    "vehicle_click_selection": true,
+    "selected_vehicle_blue": true,
+    "follow_center_x": 0.5,
+    "follow_center_y": 0.5,
+    "disconnect_shows_last_position": true,
+    "auto_reconnect_after_server_restart": true,
+    "old_selected_id_not_reassigned_after_restart": true,
+    "synthetic_banner": true,
+    "narrow_and_desktop_layout_observed": true
+  },
+  "screenshots": [
+    "map-preview.png",
+    "follow-preview.png"
+  ]
+}

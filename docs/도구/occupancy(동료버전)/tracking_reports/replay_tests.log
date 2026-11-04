@@ -1,0 +1,7 @@
+test_original_and_tracking_replay_state_changes_identical (__main__.ReplayTests.test_original_and_tracking_replay_state_changes_identical) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 7.922s
+
+OK
+Tracking off/on/20x replay: identical 107 state-change rows (wall excluded).

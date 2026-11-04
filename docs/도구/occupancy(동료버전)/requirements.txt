@@ -1,0 +1,10 @@
+# PARKIT 점유 판정 프로그램 (calibrate.py, occupancy.py) — Windows, 맥 공통
+# 설치: python -m pip install -r requirements.txt   (설명은 docs/28_점유판정_프로그램_사용법.md 2절)
+#
+# ultralytics : YOLO 모델 실행. M8.pt(YOLO26)를 읽으려면 8.4 이상. torch, torchvision, Pillow 등을 같이 설치한다.
+# opencv-python : 웹캠, 영상, 기하 계산. 5.0은 이 웹캠을 못 열어서 4.x로 묶는다(live_detect_winmac.py와 같음).
+# numpy : 계산.
+# tkinter(화면)는 파이썬에 들어 있다. 맥은 python.org 설치판 Python 3.12를 쓴다(13 문서).
+ultralytics>=8.4
+opencv-python>=4.10,<5
+numpy

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="4dp"
+    android:layout_marginVertical="6dp"
+    app:cardCornerRadius="14dp"
+    app:cardElevation="4dp"
+    app:cardBackgroundColor="#FFFFFF">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- 1단: 주차장명 및 요약 배지 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:id="@+id/tv_card_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="주차장명"
+                android:textColor="#1A1D20"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end"/>
+
+            <TextView
+                android:id="@+id/tv_card_fee"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="무료"
+                android:textColor="#FFFFFF"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:background="#4CAF50"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="3dp"
+                android:layout_marginStart="6dp"/>
+        </LinearLayout>
+
+        <!-- 2단: 잔여대수 / 총대수 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="남은 주차면: "
+                android:textColor="#6C757D"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/tv_card_spots"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="15 / 30대"
+                android:textColor="#4361EE"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- 3단: 내 위치 기준 거리 및 길찾기 버튼 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tv_card_distance"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="거리 정보 없음"
+                android:textColor="#868E96"
+                android:textSize="12sp"/>
+
+            <Button
+                android:id="@+id/btn_card_navi"
+                android:layout_width="80dp"
+                android:layout_height="30dp"
+                android:background="@drawable/bg_navi_button"
+                android:text="길찾기"
+                android:textColor="#4361EE"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:paddingHorizontal="0dp"
+                android:paddingVertical="0dp"
+                style="?android:attr/buttonStyleSmall"/>
+        </LinearLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

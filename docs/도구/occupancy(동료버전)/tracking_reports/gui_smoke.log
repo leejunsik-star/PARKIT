@@ -1,0 +1,8 @@
+[CAM-1] 영상 열림: CAM-1.mp4, 1280x720, 10.0fps, 62.0초
+[CAM-1] 보정 1920x1080 → 실행 1280x720: 좌표를 0.667배로 바꿔 씁니다.
+[CAM-2] 영상 열림: CAM-2.mp4, 1280x720, 10.0fps, 25.0초
+[CAM-2] 보정 1920x1080 → 실행 1280x720: 좌표를 0.667배로 바꿔 씁니다.
+[판정] 기록 폴더: /Users/leejunsik/Desktop/PARKIT/runs/occupancy/logs/tracking_baseline/logs/20261103_011743
+[판정] 시계: 영상 시각, 5프레임마다 분석
+[판정] 끝 (t 3.0s). EMPTY 0, OCCUPIED 1, DYNAMIC_BLIND 27, STATIC_BLIND 28. 기록: /Users/leejunsik/Desktop/PARKIT/runs/occupancy/logs/tracking_baseline/logs/20261103_011743
+GUI_SMOKE {'ready': True, 'error': None, 'window': True, 'vehicles': 4}

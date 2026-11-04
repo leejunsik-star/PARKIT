@@ -1,0 +1,65 @@
+{
+ "_설명": "PARKIT 점유 판정 실행 설정. 항목 뜻은 docs/28_점유판정_프로그램_사용법.md 5절. 경로는 이 파일 기준 상대 경로. slot_table, model은 후보 목록 중 있는 것을 쓴다(저장소 안: docs 원본, occupancy 폴더만 받은 곳: data/, models/ 복사본)",
+ "slot_table": [
+  "../../../칸표_매트좌표_초안.json",
+  "../data/칸표_매트좌표_초안.json"
+ ],
+ "model": [
+  "../../models/M8.pt",
+  "../models/M8.pt"
+ ],
+ "conf": 0.25,
+ "imgsz": 640,
+ "analyze_every_frames": 15,
+ "view_all_frames": true,
+ "calib": {
+  "hfov_deg": 50.0,
+  "auto_margin_px": 0
+ },
+ "cameras": [
+  {
+   "config": "cam_CAM-1.json",
+   "width": 1920,
+   "height": 1080
+  }
+ ],
+ "params": {
+  "zone_margin_entrance_cm": 1.0,
+  "zone_margin_back_cm": 1.0,
+  "expect_max_dist_cm": 2.0,
+  "car_width_cm": 3.2,
+  "car_length_cm": 6.5,
+  "car_height_cm": 2.0,
+  "straddle_min_cm": 1.0,
+  "cut_overlap_ratio": 0.5,
+  "side_overlap_ratio": 0.1,
+  "cut_touch_ratio": 0.01,
+  "occluder_depth_cm": 3.2,
+  "occlusion_ratio": 0.3,
+  "occlusion_height_cm": 2.0,
+  "t_occupied_s": 3.0,
+  "t_empty_s": 5.0,
+  "t_blind_s": 1.0,
+  "t_stale_s": 2.0,
+  "t_offline_s": 30.0
+ },
+ "overrides": {
+  "rows": {},
+  "slots": {}
+ },
+ "presets": {
+  "demo": {
+   "t_occupied_s": 1.0,
+   "t_empty_s": 2.0
+  }
+ },
+ "display": {
+  "plan_px_per_cm": 10,
+  "startup_overlay_s": 5.0
+ },
+ "log": {
+  "frames": false,
+  "record": false,
+  "dir": "../logs"
+ }
+}

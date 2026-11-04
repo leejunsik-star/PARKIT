@@ -1,0 +1,40 @@
+OS: Windows-10-10.0.26200-SP0  /  Python 3.9.25  /  카메라 번호 0
+
+[1] 연결된 카메라: USB Camera
+
+[2] 카메라가 알려주는 지원 형식 (ffmpeg)
+--- USB Camera
+vcodec=mjpeg  min s=1280x720 fps=25 max s=1280x720 fps=30
+vcodec=mjpeg  min s=1280x720 fps=25 max s=1280x720 fps=30 (pc, bt470bg/bt709/unknown, center)
+vcodec=mjpeg  min s=1920x1080 fps=25 max s=1920x1080 fps=30
+vcodec=mjpeg  min s=1920x1080 fps=25 max s=1920x1080 fps=30 (pc, bt470bg/bt709/unknown, center)
+vcodec=mjpeg  min s=640x480 fps=25 max s=640x480 fps=30
+vcodec=mjpeg  min s=640x480 fps=25 max s=640x480 fps=30 (pc, bt470bg/bt709/unknown, center)
+vcodec=mjpeg  min s=640x360 fps=25 max s=640x360 fps=30
+vcodec=mjpeg  min s=640x360 fps=25 max s=640x360 fps=30 (pc, bt470bg/bt709/unknown, center)
+vcodec=mjpeg  min s=352x288 fps=25 max s=352x288 fps=30
+vcodec=mjpeg  min s=352x288 fps=25 max s=352x288 fps=30 (pc, bt470bg/bt709/unknown, center)
+vcodec=mjpeg  min s=352x240 fps=25 max s=352x240 fps=30
+vcodec=mjpeg  min s=352x240 fps=25 max s=352x240 fps=30 (pc, bt470bg/bt709/unknown, center)
+pixel_format=yuyv422  min s=320x240 fps=30 max s=320x240 fps=30
+pixel_format=yuyv422  min s=320x240 fps=30 max s=320x240 fps=30 (tv, bt470bg/bt709/unknown, topleft)
+pixel_format=yuyv422  min s=640x480 fps=30 max s=640x480 fps=30
+pixel_format=yuyv422  min s=640x480 fps=30 max s=640x480 fps=30 (tv, bt470bg/bt709/unknown, topleft)
+
+[3] OpenCV 4.10.0 실측 (형식을 요청한 뒤 실제로 받은 값과 fps)
+열기 시도: 번호 0, DSHOW -> 성공
+사용: 번호 0, DSHOW
+요청                    실제 해상도        실제 형식         측정 fps
+MJPG 2592x1944 @30    1920x1080     }ë6ä            25.6
+MJPG 2560x1440 @30    1920x1080     }ë6ä             1.0
+MJPG 1920x1080 @30    1920x1080     MJPG            25.6
+MJPG 1280x720 @30    1280x720      MJPG            30.1
+MJPG 640x480 @30    640x480       YUY2            21.6
+YUY2 2592x1944 @30    1920x1080     }ë6ä            25.6
+YUY2 2560x1440 @30    1920x1080     }ë6ä            25.6
+YUY2 1920x1080 @30    1920x1080     MJPG            25.6
+YUY2 1280x720 @30    1280x720      MJPG            29.9
+YUY2 640x480 @30    640x480       YUY2            21.6
+MJPG 1280x720 @15    1280x720      MJPG            30.1
+
+스냅샷 저장: webcam_snapshot_max_1920x1080.jpg, webcam_snapshot_720p.jpg

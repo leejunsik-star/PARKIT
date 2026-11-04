@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주차 공유 플랫폼 - UML 및 사용자 흐름도</title>
+    <!-- Tailwind CSS & Google Fonts & FontAwesome -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            dark: '#0b0f19'
+                        },
+                        accent: {
+                            purple: '#8b5cf6',
+                            neon: '#10b981'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'Inter', 'Noto Sans KR', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+KR:wght@300;400;500;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Mermaid.js -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.2.4/dist/mermaid.min.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+            background: radial-gradient(circle at top right, rgba(139, 92, 246, 0.08), transparent), 
+                        radial-gradient(circle at bottom left, rgba(14, 165, 233, 0.08), transparent);
+        }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .dark .glass-panel {
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.3);
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(156, 163, 175, 0.5);
+        }
+        
+        /* Mermaid Diagram Custom Overrides */
+        .mermaid svg {
+            max-width: 100% !important;
+            height: auto !important;
+            background: transparent !important;
+        }
+        
+        .nodeRect, .nodeCircle, .nodePolygon {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            cursor: pointer !important;
+        }
+        .nodeRect:hover, .nodeCircle:hover, .nodePolygon:hover {
+            filter: drop-shadow(0px 0px 10px rgba(14, 165, 233, 0.8)) !important;
+            stroke-width: 3px !important;
+        }
+        
+        /* Tab transitions */
+        .tab-content {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+        }
+        .tab-content.active {
+            display: block;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-brand-dark text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-300">
+
+    <div class="max-w-7xl mx-auto px-4 py-6">
+        
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
+            <div>
+                <div class="flex items-center gap-2 text-brand-500 font-bold tracking-wider text-xs uppercase mb-1">
+                    <span class="inline-block w-2 h-2 rounded-full bg-accent-neon animate-pulse"></span>
+                    Capstone Design Project
+                </div>
+                <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-brand-500 via-accent-purple to-pink-500 bg-clip-text text-transparent">
+                    스마트 주차 공유 플랫폼 UML & Flowchart
+                </h1>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                    기존 프로젝트 분석 및 즐겨찾기·실시간 도면·외부 내비 연동·지오펜싱 복귀 흐름 시각화
+                </p>
+            </div>
+            
+            <!-- Global Utility Controls -->
+            <div class="flex items-center gap-3">
+                <!-- Theme Toggle -->
+                <button id="themeToggleBtn" onclick="toggleTheme()" class="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 transition shadow-sm text-slate-500 dark:text-slate-300" title="화면 테마 전환">
+                    <i class="fa-solid fa-moon dark:hidden"></i>
+                    <i class="fa-solid fa-sun hidden dark:inline"></i>
+                </button>
+                <!-- SVG Download -->
+                <button onclick="downloadSVG()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white font-semibold shadow-md shadow-brand-500/20 hover:shadow-brand-600/30 transition text-sm">
+                    <i class="fa-solid fa-download"></i>
+                    <span>다이어그램 SVG 추출</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="flex overflow-x-auto gap-2 pb-1 mb-6 border-b border-slate-200 dark:border-slate-800 custom-scrollbar">
+            <button onclick="switchTab('tab-flowchart')" class="tab-btn px-4 py-2.5 rounded-lg font-medium text-sm whitespace-nowrap transition-all duration-200 bg-brand-500 text-white dark:bg-brand-500" id="btn-tab-flowchart">
+                <i class="fa-solid fa-route mr-2"></i>전체 사용자 흐름도
+            </button>
+            <button onclick="switchTab('tab-seq-fav')" class="tab-btn px-4 py-2.5 rounded-lg font-medium text-sm whitespace-nowrap transition-all duration-200 text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800" id="btn-tab-seq-fav">
+                <i class="fa-solid fa-star mr-2"></i>[추가] 즐겨찾기 시퀀스
+            </button>
+            <button onclick="switchTab('tab-seq-layout')" class="tab-btn px-4 py-2.5 rounded-lg font-medium text-sm whitespace-nowrap transition-all duration-200 text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800" id="btn-tab-seq-layout">
+                <i class="fa-solid fa-map mr-2"></i>[추가] 실시간 도면 확인
+            </button>
+            <button onclick="switchTab('tab-seq-navi')" class="tab-btn px-4 py-2.5 rounded-lg font-medium text-sm whitespace-nowrap transition-all duration-200 text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800" id="btn-tab-seq-navi">
+                <i class="fa-solid fa-compass mr-2"></i>[추가] 내비 & 지오펜싱 복귀
+            </button>
+            <button onclick="switchTab('tab-specs')" class="tab-btn px-4 py-2.5 rounded-lg font-medium text-sm whitespace-nowrap transition-all duration-200 text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800" id="btn-tab-specs">
+                <i class="fa-solid fa-list-check mr-2"></i>개발 명세서 (계획서 삽입용)
+            </button>
+        </nav>
+
+        <!-- Main Workspace (Grid Layout) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            
+            <!-- Left Side: Diagram Board -->
+            <div class="lg:col-span-2 flex flex-col gap-4">
+                <div class="glass-panel rounded-2xl p-6 shadow-xl relative overflow-hidden min-h-[550px] flex flex-col justify-between">
+                    
+                    <!-- Diagram Header Controls -->
+                    <div class="flex justify-between items-center z-10 mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-brand-500"></span>
+                            <span class="font-semibold text-xs tracking-wider uppercase text-slate-400 dark:text-slate-500" id="diagram-title-label">Flowchart</span>
+                        </div>
+                        
+                        <!-- Pan & Zoom Control Bar -->
+                        <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-xl border border-slate-200/50 dark:border-slate-700/50">
+                            <button onclick="zoomDiagram(0.85)" class="w-8 h-8 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-xs transition" title="축소">
+                                <i class="fa-solid fa-minus"></i>
+                            </button>
+                            <button onclick="zoomReset()" class="w-8 h-8 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-xs transition" title="100%">
+                                <i class="fa-solid fa-expand"></i>
+                            </button>
+                            <button onclick="zoomDiagram(1.15)" class="w-8 h-8 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-xs transition" title="확대">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Diagram Stage -->
+                    <div class="flex-grow flex items-center justify-center overflow-auto custom-scrollbar p-2" id="diagram-container">
+                        
+                        <!-- Tab 1: Flowchart -->
+                        <div id="tab-flowchart" class="tab-content active w-full">
+                            <pre class="mermaid text-center">
+flowchart LR
+    %% Theme Configurations & Styling
+    classDef default fill:#1e293b,stroke:#475569,stroke-width:1px,color:#f8fafc;
+    classDef main fill:#0369a1,stroke:#0ea5e9,stroke-width:2px,color:#fff;
+    classDef newAct fill:#7c2d12,stroke:#ea580c,stroke-width:2px,color:#fff;
+    classDef decision fill:#f59e0b,stroke:#d97706,stroke-width:2px,color:#000;
+    classDef external fill:#581c87,stroke:#8b5cf6,stroke-width:2px,color:#fff;
+    classDef action fill:#0f172a,stroke:#3b82f6,stroke-dasharray: 5 5,color:#3b82f6;
+
+    Start([앱 실행]) --> MainActivity[MainActivity<br>메인 지도 화면]:::main
+    
+    %% 왼쪽: 회원 및 마이페이지 플로우
+    subgraph MemberFlow [회원 및 프로필 관리]
+        direction LR
+        CheckLogin{로그인 상태?}:::decision
+        LoginActivity[LoginActivity<br>로그인 화면]:::main
+        RegisterActivity[RegisterActivity<br>회원가입 화면]:::main
+        ProfileActivity[ProfileActivity<br>마이페이지]:::main
+        EditProfileActivity[EditProfileActivity<br>프로필 수정]:::main
+        FavList[즐겨찾는 주차장 목록]:::action
+    end
+    
+    %% 오른쪽: 주차장 상세 및 내비/지오펜싱 플로우
+    subgraph ParkingFlow [주차장 상세 및 서비스]
+        direction LR
+        ParkingDetailActivity[ParkingDetailActivity<br>주차장 상세 화면]:::newAct
+        FavoriteAction[즐겨찾기 추가/삭제<br>DB 동기화]:::action
+        DrawingViewer[도면 뷰어 활성화<br>실시간 빈칸/점유 감지]:::action
+        NaviLauncher[외부 내비 연동 실행<br>Kakao/Tmap]:::external
+        BackgroundService[백그라운드 지오펜싱 등록<br>목적지 반경 100m 설정]:::action
+        Driving[외부 내비 주행]
+        GeofenceTrigger{지오펜싱<br>감지?}:::decision
+        AppAutoLaunch[어플리케이션 자동 복귀<br>포그라운드 활성화]:::action
+    end
+    
+    SearchActivity[SearchActivity<br>주차장 검색]:::main
+    
+    %% 메인 연결
+    MainActivity -->|마이페이지 클릭| CheckLogin
+    MainActivity -->|검색창 클릭| SearchActivity
+    SearchActivity -->|주차장 선택| MainActivity
+    
+    %% 메인에서 주차장 상세로 (오른쪽으로 흐름 분기)
+    MainActivity -->|마커/상세 클릭| ParkingDetailActivity
+    
+    %% 회원 관리 연결 구조
+    CheckLogin -->|No| LoginActivity
+    CheckLogin -->|Yes| ProfileActivity
+    LoginActivity -->|성공| ProfileActivity
+    LoginActivity -->|회원가입| RegisterActivity
+    RegisterActivity -->|완료| LoginActivity
+    ProfileActivity -->|수정| EditProfileActivity
+    EditProfileActivity -->|완료| ProfileActivity
+    ProfileActivity -->|목록 조회| FavList
+    
+    %% 즐겨찾기 목록에서 상세로 이동
+    FavList -->|주차장 클릭| ParkingDetailActivity
+    
+    %% 주차장 상세 연결 구조
+    ParkingDetailActivity -->|즐겨찾기 토글| FavoriteAction
+    ParkingDetailActivity -->|도면 확인| DrawingViewer
+    ParkingDetailActivity -->|길찾기 클릭| NaviLauncher
+    NaviLauncher --> BackgroundService
+    BackgroundService --> Driving
+    Driving -->|접근| GeofenceTrigger
+    GeofenceTrigger -->|Yes| AppAutoLaunch
+    AppAutoLaunch --> ParkingDetailActivity
+
+    %% Click Event Links
+    click MainActivity callNodeClick "MainActivity"
+    click CheckLogin callNodeClick "CheckLogin"
+    click ProfileActivity callNodeClick "ProfileActivity"
+    click LoginActivity callNodeClick "LoginActivity"
+    click RegisterActivity callNodeClick "RegisterActivity"
+    click EditProfileActivity callNodeClick "EditProfileActivity"
+    click ParkingDetailActivity callNodeClick "ParkingDetailActivity"
+    click FavoriteAction callNodeClick "FavoriteAction"
+    click DrawingViewer callNodeClick "DrawingViewer"
+    click NaviLauncher callNodeClick "NaviLauncher"
+    click BackgroundService callNodeClick "BackgroundService"
+    click GeofenceTrigger callNodeClick "GeofenceTrigger"
+    click AppAutoLaunch callNodeClick "AppAutoLaunch"
+                            </pre>
+                        </div>
+                        
+                        <!-- Tab 2: Sequence - Favorites -->
+                        <div id="tab-seq-fav" class="tab-content w-full">
+                            <pre class="mermaid text-center">
+sequenceDiagram
+    autonumber
+    actor User as 사용자
+    participant Detail as ParkingDetailActivity
+    participant VM as ParkingViewModel
+    participant Rep as ParkingRepository
+    participant DB as SQLite / Room (Local)
+    participant Server as Remote Server / Firebase
+    
+    User->>Detail: 즐겨찾기 버튼(별 모양) 클릭
+    Detail->>VM: toggleFavoriteStatus(parkingId)
+    alt 현재 즐겨찾기 상태 = true
+        VM->>Rep: removeFavorite(parkingId)
+        Rep->>DB: DELETE FROM favorites WHERE parking_id = parkingId
+        Rep->>Server: HTTP DELETE /favorites/{parkingId}
+    else 현재 즐겨찾기 상태 = false
+        VM->>Rep: addFavorite(parkingId)
+        Rep->>DB: INSERT INTO favorites VALUES (parkingId, timestamp)
+        Rep->>Server: HTTP POST /favorites (parkingId 데이터 전송)
+    end
+    Server-->>Rep: API Response (200 OK / 201 Created)
+    Rep-->>VM: 업데이트 성공 완료 (Live Data/State Flow)
+    VM-->>Detail: UI 상태 업데이트 (별 아이콘 활성/비활성 상태 반전)
+    Detail-->>User: 토스트 알림 ("즐겨찾기에 추가되었습니다.")
+                            </pre>
+                        </div>
+                        
+                        <!-- Tab 3: Sequence - Layout -->
+                        <div id="tab-seq-layout" class="tab-content w-full">
+                            <pre class="mermaid text-center">
+sequenceDiagram
+    autonumber
+    actor User as 사용자
+    participant Detail as ParkingDetailActivity
+    participant Canvas as CustomDrawingView
+    participant VM as ParkingViewModel
+    participant Rep as ParkingRepository
+    participant Server as Remote Server / Firebase DB
+    
+    User->>Detail: 주차장 상세화면 진입 / 도면 탭 활성화
+    Detail->>VM: getParkingLayoutAndStatus(parkingId)
+    VM->>Rep: fetchLayoutStatus(parkingId)
+    Rep->>Server: HTTP GET /parking/{parkingId}/layout-status
+    Server-->>Rep: 1. 도면 데이터 (SVG/좌표) & 2. 주차면 실시간 상태 (Empty/Occupied)
+    Rep-->>VM: 파싱된 ParkingLayout 객체 전달
+    VM-->>Detail: Layout UI 상태 변경 감지
+    Detail->>Canvas: drawParkingLayout(LayoutData)
+    Note over Canvas: 각 주차 구역 루프 순회<br>점유상태: Occupied -> 적색 그리기<br>점유상태: Empty -> 녹색 그리기
+    Canvas-->>User: 화면에 색칠된 주차장 도면 시각화
+    
+    loop 5초 주기 실시간 폴링
+        VM->>Rep: getRealtimeOccupancy(parkingId)
+        Rep->>Server: HTTP GET /parking/{parkingId}/realtime-occupancy
+        Server-->>Rep: 최신 점유 데이터
+        Rep-->>VM: 전달
+        VM-->>Detail: 상태 전송
+        Detail->>Canvas: updateOccupancy(newOccupancyData)
+        Canvas-->>User: 실시간 상태가 변한 구역의 색상이 부드럽게 갱신됨
+    end
+                            </pre>
+                        </div>
+                        
+                        <!-- Tab 4: Sequence - Navigation & Geofencing -->
+                        <div id="tab-seq-navi" class="tab-content w-full">
+                            <pre class="mermaid text-center">
+sequenceDiagram
+    autonumber
+    actor User as 사용자
+    participant Detail as ParkingDetailActivity
+    participant System as Android OS (Intent)
+    participant External as 외부 내비 앱 (Kakao / Tmap)
+    participant Geo as GeofenceManager (App Service)
+    participant GPS as Google Location API
+    
+    User->>Detail: "내비게이션 안내" 버튼 클릭
+    
+    %% 내비 앱 실행 %%
+    Detail->>System: startActivity(Intent with geo:lat,lng URL scheme)
+    System->>External: 내비 실행 및 목적지 경로안내 활성화
+    
+    %% 백그라운드 지오펜싱 등록 %%
+    Detail->>Geo: registerDestinationGeofence(parkingId, lat, lng)
+    Geo->>GPS: GeofencingClient.addGeofences(Geofence object, PendingIntent)
+    Note over Geo: 반경 100m, Dwell Delay 5s, 전환타입 ENTER 등록
+    
+    %% 주행 단계 %%
+    User->>External: 내비 안내를 보며 운행 (우리 앱은 백그라운드 상태)
+    
+    %% 복귀 단계 %%
+    GPS->>GPS: 실시간 GPS 비교 (목적지 반경 100m 이내 진입 감지)
+    GPS->>System: PendingIntent 트리거 (GeofenceBroadcastReceiver 호출)
+    System->>Geo: onReceive(context, Intent)
+    
+    %% 앱 강제 호출 %%
+    Geo->>System: Notification 채널에 알림 발행 & Intent(ParkingDetailActivity) 실행
+    Note over System: Android 10+ 백그라운드 실행 제약 준수를 위해<br>상단 헤드업 알림 팝업 후 탭하여 전환 처리
+    System->>Detail: ParkingDetailActivity 재시작 (주차장 ID 파라미터 전달)
+    Detail->>User: 주차장 상세화면 자동 표출 및 최신 도면/빈칸 실시간 렌더링
+                            </pre>
+                        </div>
+                        
+                        <!-- Tab 5: Specifications Table -->
+                        <div id="tab-specs" class="tab-content w-full">
+                            <div class="prose dark:prose-invert max-w-none text-sm leading-relaxed p-4">
+                                <h3 class="text-lg font-bold text-brand-500 mb-3"><i class="fa-solid fa-code mr-2"></i>개발 계획서 삽입용 상세 명세</h3>
+                                
+                                <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 mb-6">
+                                    <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+                                        <thead class="bg-slate-100 dark:bg-slate-800/80">
+                                            <tr>
+                                                <th class="px-4 py-3 text-left font-semibold text-slate-600 dark:text-slate-300">추가 기능</th>
+                                                <th class="px-4 py-3 text-left font-semibold text-slate-600 dark:text-slate-300">구현 설명</th>
+                                                <th class="px-4 py-3 text-left font-semibold text-slate-600 dark:text-slate-300">핵심 클래스 / API</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-200 dark:divide-slate-800 text-xs">
+                                            <tr>
+                                                <td class="px-4 py-3 font-semibold text-slate-900 dark:text-slate-200">1. 즐겨찾기 기능</td>
+                                                <td class="px-4 py-3">각 주차장 정보에 즐겨찾기 상태를 적용하고 내부 Room DB와 원격 서버 DB를 비동기식으로 실시간 동기화합니다.</td>
+                                                <td class="px-4 py-3"><code class="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-pink-500">Room DAO</code>, <code class="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-pink-500">Retrofit2 API</code>, <code class="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-pink-500">StateFlow</code></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="px-4 py-3 font-semibold text-slate-900 dark:text-slate-200">2. 실시간 도면 & 빈칸 표시</td>
+                                                <td class="px-4 py-3">지도에서 주차장을 선택하면 해당 주차장의 CAD/SVG 기반 도면을 그리고 주차 구역별 빈칸(녹색)과 점유(적색) 상태를 센서 데이터와 연동하여 실시간 피딩합니다.</td>
+                                                <td class="px-4 py-3"><code class="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-pink-500">Custom Drawing View</code>, <code class="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-pink-500">WebSocket / Firebase LiveDB</code></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="px-4 py-3 font-semibold text-slate-900 dark:text-slate-200">3. 외부 네비 앱 연동</td>
+                                                <td class="px-4 py-3">"길찾기" 버튼 터치 시 안드로이드 Intent를 통해 카카오내비/티맵이 파라미터(위경도, 주차장 이름)를 물고 실행되도록 URI Scheme 호출을 실행합니다.</td>
+                                                <td class="px-4 py-3"><code class="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-pink-500">kakaonavi://route</code>, <code class="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-pink-500">tmap://view_path</code>, <code class="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-pink-500">Intent.ACTION_VIEW</code></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="px-4 py-3 font-semibold text-slate-900 dark:text-slate-200">4. 지오펜싱 기반 자동 복귀</td>
+                                                <td class="px-4 py-3">목적지 주차장 반경 100m 이내로 단말의 위치가 확인되면 백그라운드 BroadcastReceiver가 활성화되어 화면 알림과 함께 앱의 상세화면으로 자동 전환시킵니다.</td>
+                                                <td class="px-4 py-3"><code class="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-pink-500">GeofencingClient</code>, <code class="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-pink-500">GeofenceBroadcastReceiver</code>, <code class="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-pink-500">PendingIntent</code></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 rounded-r-xl text-xs">
+                                    <div class="font-bold text-blue-800 dark:text-blue-300 mb-1">💡 작성 시 참고 사항</div>
+                                    본 다이어그램과 흐름 명세는 카프스톤 디자인(또는 주요 개발 프로젝트) 중간/최종 보고서의 '시스템 흐름도(System Flowchart)' 및 '모듈별 상세 시퀀스 설계' 영역에 텍스트와 다이어그램 이미지로 다용도 삽입이 가능하도록 최적화되어 있습니다.
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Diagram Helper Overlay & Legend -->
+                    <div class="mt-4 pt-4 border-t border-slate-200/50 dark:border-slate-800/50 flex flex-col md:flex-row justify-between items-center gap-3">
+                        <div class="text-xs text-slate-400 dark:text-slate-500" id="interactive-hint">
+                            <i class="fa-solid fa-info-circle mr-1"></i> 노드를 클릭하면 우측 패널에서 상세 스펙이 나타납니다.
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3 text-[10px]">
+                            <div class="flex items-center gap-1">
+                                <span class="w-3 h-2 rounded border border-brand-500 bg-brand-500/10"></span>
+                                <span class="text-slate-500 dark:text-slate-400">기존 화면(Activity)</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <span class="w-3 h-2 rounded border border-orange-500 bg-orange-950/20"></span>
+                                <span class="text-slate-500 dark:text-slate-400">신규 추가 화면</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <span class="w-3 h-2 rounded border border-purple-500 bg-purple-950/20"></span>
+                                <span class="text-slate-500 dark:text-slate-400">외부 연동</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <span class="w-3 h-2 rounded border border-dashed border-blue-500 bg-slate-900/50"></span>
+                                <span class="text-slate-500 dark:text-slate-400">백그라운드 로직/서비스</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Side: Details / Spec Control Center -->
+            <div class="glass-panel rounded-2xl p-6 shadow-xl flex flex-col gap-5 min-h-[550px] border border-slate-200/50 dark:border-slate-800">
+                <div class="border-b border-slate-200 dark:border-slate-800 pb-3">
+                    <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-info text-brand-500"></i>
+                        <span>기능 상세 세부 정보</span>
+                    </h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">클릭한 단계의 소스코드 구조와 세부 아키텍처 가이드</p>
+                </div>
+                
+                <!-- Dynamic Content Container -->
+                <div id="specDetailPanel" class="flex-grow flex flex-col justify-between">
+                    <div class="flex flex-col items-center justify-center text-center py-12 text-slate-400 dark:text-slate-500 flex-grow" id="empty-state">
+                        <i class="fa-solid fa-mouse-pointer text-4xl mb-4 text-slate-300 dark:text-slate-700 animate-bounce"></i>
+                        <h4 class="font-bold text-sm">노드를 선택하세요</h4>
+                        <p class="text-xs px-6 mt-2 max-w-[280px]">왼쪽 사용자 흐름도에서 박스를 클릭하면 세부 개발 정보 및 구현 코드를 확인할 수 있습니다.</p>
+                    </div>
+                    
+                    <!-- Detail Spec Content (Hidden by default) -->
+                    <div id="detail-content" class="hidden flex-col gap-4 text-sm flex-grow">
+                        <!-- Node Tag / Type -->
+                        <div class="flex items-center gap-2">
+                            <span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-brand-500/10 text-brand-500 border border-brand-500/20" id="node-tag">ACTIVITY</span>
+                            <span class="text-slate-400 text-xs font-mono" id="node-id">MainActivity</span>
+                        </div>
+                        
+                        <!-- Title & Desc -->
+                        <div>
+                            <h3 class="text-base font-extrabold text-slate-950 dark:text-white" id="node-title">MainActivity (지도 화면)</h3>
+                            <p class="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed" id="node-desc">
+                                앱 진입 시 최초 화면. 주변 주차장을 검색하고 지도에 실시간으로 표시하는 기능을 수행합니다.
+                            </p>
+                        </div>
+                        
+                        <!-- Technology Stack & Native API -->
+                        <div class="bg-slate-100 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-200/50 dark:border-slate-800">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-cubes mr-1.5"></i>사용 기술 & SDK</h4>
+                            <div class="text-xs font-semibold text-slate-800 dark:text-slate-200" id="node-tech">
+                                Kakao Map SDK v2, Google Play Services Location
+                            </div>
+                        </div>
+
+                        <!-- Java/Kotlin File Path Link -->
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5"><i class="fa-solid fa-folder-open mr-1.5"></i>관련 소스 파일</h4>
+                            <div class="font-mono text-xs text-brand-500 hover:underline cursor-pointer flex items-center gap-1.5" id="node-code-container">
+                                <i class="fa-regular fa-file-code"></i>
+                                <span id="node-code">app/src/main/java/com/.../MainActivity.java</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Implementation Guide -->
+                        <div class="border-t border-slate-200 dark:border-slate-800 pt-3 flex-grow">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-circle-check mr-1.5"></i>구현 요구 로직</h4>
+                            <ul class="text-xs text-slate-600 dark:text-slate-300 space-y-2 list-disc pl-4" id="node-logic">
+                                <li>사용자의 현재 위경도 수집 동의 팝업 출력</li>
+                                <li>카카오 지도 뷰 초기화 및 마커 렌더링</li>
+                                <li>마이페이지, 검색 창으로 연결하기 위한 Intent 라우터 적용</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Specs footer -->
+                    <div class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800 text-xxs text-slate-400 dark:text-slate-500 flex justify-between">
+                        <span>프로젝트 경로: /app/src/main/</span>
+                        <span>v1.0 (2026 Capstone)</span>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        
+    </div>
+
+    <!-- Script Block -->
+    <script>
+        // Init Mermaid
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            securityLevel: 'loose',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+
+        // Diagram Zoom State
+        let currentScale = 1.0;
+        let translateX = 0;
+        let translateY = 0;
+        
+        // Node detailed spec database
+        const nodeDatabase = {
+            "MainActivity": {
+                tag: "ACTIVITY",
+                title: "MainActivity (지도 화면)",
+                desc: "애플리케이션 구동 시 사용자에게 최초로 로드되는 코어 액티비티입니다. 주변 주차장의 위치를 위성/일반 지도 상에 마커로 뿌려주는 역할을 수행합니다. 비회원 사용자도 검색 및 조회 기능은 자유롭게 제공됩니다.",
+                tech: "Kakao Map SDK, FusedLocationProviderClient (Google Play Services)",
+                code: "app/src/main/java/com/.../MainActivity.java",
+                logic: [
+                    "GPS 권한 동적 체크 및 수락 요청",
+                    "Kakao Map SDK MapView 인스턴스 초기화 및 레이아웃 바인딩",
+                    "서버 API 통신을 통해 현재 화면 위경도 반경 내 주차장 목록 마커 드로잉",
+                    "상단 검색 바 및 하단 마이페이지 플로팅 액션 버튼 인터랙션"
+                ]
+            },
+            "CheckLogin": {
+                tag: "LOGIC DECISION",
+                title: "로그인 유무 판별 세션 체크",
+                desc: "마이페이지 혹은 로그인 특화 기능 요청 시, 단말에 저장된 세션 토큰 정보를 체크하는 프로세스입니다. 로그인 성공 여부에 따라 UI 분기 처리를 진행합니다.",
+                tech: "SharedPreferences, EncryptedSharedPreferences 또는 Firebase Auth Session Check",
+                code: "app/src/main/java/com/.../utils/SessionManager.java",
+                logic: [
+                    "앱 내에 저장된 access_token 또는 uid가 존재하는지 검사",
+                    "토큰이 있을 경우, 토큰의 유효 기간(Expiry)을 체크",
+                    "유효할 시 -> 마이페이지(ProfileActivity)로 라우팅",
+                    "유효하지 않거나 토큰 없을 시 -> 로그인화면(LoginActivity)으로 강제 전환"
+                ]
+            },
+            "LoginActivity": {
+                tag: "ACTIVITY",
+                title: "LoginActivity (로그인 화면)",
+                desc: "사용자가 계정에 로그인할 수 있게 로그인 ID와 Password 입력을 받는 화면입니다. SNS 간편 로그인 기능 및 회원가입 전환 통로를 가지고 있습니다.",
+                tech: "Firebase Auth, Retrofit2 API Request",
+                code: "app/src/main/java/com/.../LoginActivity.java",
+                logic: [
+                    "사용자 입력(이메일, 패스워드) 검증(Validation)",
+                    "자체 서버 API 로그인 엔드포인트 호출 또는 Firebase OAuth 트리거",
+                    "로그인 성공 시 세션 데이터 로컬 캐싱 처리 및 ResultCode 리턴",
+                    "회원가입(RegisterActivity) 전환 인텐트 제공"
+                ]
+            },
+            "RegisterActivity": {
+                tag: "ACTIVITY",
+                title: "RegisterActivity (회원가입 화면)",
+                desc: "신규 유저 유입을 위한 회원 등록 액티비티입니다. 이메일 중복 확인, 비밀번호 규칙성 검증 등을 거쳐 가입을 처리합니다.",
+                tech: "Validation Regex, TextInputLayout, API Call",
+                code: "app/src/main/java/com/.../RegisterActivity.java",
+                logic: [
+                    "입력 필드 정규식 기반 클라이언트 사전 정밀 필터링",
+                    "이메일 중복 여부를 백엔드 서버에 사전 비동기 쿼리",
+                    "가입 승인 시 회원 DB 레코드 추가 후 로그인 화면으로 인텐트 전환"
+                ]
+            },
+            "ProfileActivity": {
+                tag: "ACTIVITY",
+                title: "ProfileActivity (마이페이지)",
+                desc: "로그인 완료 상태의 사용자가 본인의 정보를 파악하고, 예약한 주차권 상세 및 본인의 주차장 즐겨찾기(Favorites) 리스트를 모아보는 허브 화면입니다.",
+                tech: "RecyclerView, Glide Image Loader",
+                code: "app/src/main/java/com/.../ProfileActivity.java",
+                logic: [
+                    "서버로부터 회원 프로필 데이터(이름, 프로필 이미지)를 가져와 세팅",
+                    "로컬 DB에 캐싱되어 있는 즐겨찾는 주차장 목록 리사이클러뷰에 바인딩",
+                    "정보수정(EditProfileActivity) 및 로그아웃/회원탈퇴 트리거 관리"
+                ]
+            },
+            "EditProfileActivity": {
+                tag: "ACTIVITY",
+                title: "EditProfileActivity (정보 수정)",
+                desc: "사용자 프로필 수정용 액티비티입니다. 닉네임, 휴대폰 번호, 프로필 이미지를 서버에 업데이트합니다.",
+                tech: "MultipartBody (Image Upload), API Request",
+                code: "app/src/main/java/com/.../EditProfileActivity.java",
+                logic: [
+                    "갤러리 호출 및 기기 내부 이미지 URI 획득",
+                    "바뀐 입력값들을 폼 데이터로 묶어 서버 이미지 서버와 동시 멀티파트 업로드",
+                    "성공 시 마이페이지 화면 리프레시 유도"
+                ]
+            },
+            "ParkingDetailActivity": {
+                tag: "NEW ACTIVITY",
+                title: "ParkingDetailActivity (주차장 상세)",
+                desc: "사용자가 선택한 특정 주차장의 실시간 상태를 집약적으로 확인하는 핵심 신규 화면입니다. 실시간 점유율, 상세 주소 및 운영시간, 즐겨찾기 토글, 실시간 도면 렌더러, 그리고 목적지 네비게이션 호출 인텐트를 전부 관리합니다.",
+                tech: "Custom Canvas Draw View, ConstraintLayout, WebSocket",
+                code: "app/src/main/java/com/.../ParkingDetailActivity.java",
+                logic: [
+                    "전달받은 주차장 고유 ID(ParkingId)로 주차장의 세부 데이터 로딩",
+                    "즐겨찾기 여부를 로컬 DB(Room)에서 쿼리하여 하트/별 아이콘 활성 상태 지정",
+                    "실시간 점유 상태 연동을 위해 웹소켓/Firebase DB 리스너 바인딩",
+                    "외부 내비게이션 실행 및 지오펜싱 등록 로직 처리"
+                ]
+            },
+            "FavoriteAction": {
+                tag: "BACKGROUND PROCESS",
+                title: "즐겨찾기 DB 및 서버 동기화",
+                desc: "상세화면이나 마이페이지에서 즐겨찾기를 등록/해제할 때 작동하는 로직입니다. 오프라인 상태에서도 동작할 수 있도록 로컬 Room DB에 최우선 선반영한 뒤, 원격 서버 API 호출을 비동기로 실행하여 완벽히 동기화합니다.",
+                tech: "Android Room (SQLite), Coroutines (Dispatchers.IO), Retrofit2",
+                code: "app/src/main/java/com/.../data/ParkingRepository.java",
+                logic: [
+                    "즐겨찾기 버튼 클릭 시 SQLite DB에 즉시 Insert / Delete 트랜잭션 수행",
+                    "코루틴 백그라운드 스레드를 이용해 백엔드 API 서버로 POST/DELETE 호출 실행",
+                    "네트워크 오류로 실패 시, 재접속 되었을 때 동기화할 수 있도록 Room DB에 동기화 플래그(sync_pending = 1) 마킹 처리"
+                ]
+            },
+            "DrawingViewer": {
+                tag: "CUSTOM UI VIEW",
+                title: "실시간 주차면 점유 도면 뷰어",
+                desc: "주차장의 물리 도면(CAD 또는 SVG 데이터 좌표)을 바탕으로 안드로이드 Custom View 상에 직접 주차 라인을 렌더링하고, 실시간 IoT 센서로 취합된 각 구획의 주차 상태를 녹색(비어있음)과 적색(점유중)으로 실시간 갱신 드로잉하는 핵심 기능입니다.",
+                tech: "Android View - Canvas & Paint, LiveData/StateFlow",
+                code: "app/src/main/java/com/.../ui/CustomDrawingView.java",
+                logic: [
+                    "주차 구획별 2D 좌표 정보(x, y, width, height) 로딩",
+                    "Canvas.drawRect() 및 drawPath()를 사용하여 주차면 그래픽 표현",
+                    "구역별 실시간 상태 데이터가 갱신(Observe)될 때마다 invalidate()를 호출하여 화면 재드로잉",
+                    "비어있는 구역(Empty) -> Paint 색상 녹색(#10b981), 점유된 구역(Occupied) -> 적색(#ef4444)"
+                ]
+            },
+            "NaviLauncher": {
+                tag: "EXTERNAL SYSTEM INTEGRATION",
+                title: "외부 내비게이션 앱 실행 연동",
+                desc: "사용자가 타깃 주차장을 정한 뒤 길찾기를 누르면, 단말 내 카카오내비 혹은 티맵 앱을 직접 호출하는 인텐트 스키마(Intent Scheme)를 구동합니다. 해당 앱이 미설치된 경우 원스토어/구글플레이 스토어로 다운로드 링크를 전환합니다.",
+                tech: "Android Implicit Intent, URL Scheme (Kakao, Tmap)",
+                code: "app/src/main/java/com/.../utils/NaviIntegrationHelper.java",
+                logic: [
+                    "카카오내비 앱 설치 여부 패키지 검사 -> 설치 시 'kakaonavi://route?ep=위도,경도' 인텐트 실행",
+                    "티맵 앱 설치 여부 패키지 검사 -> 설치 시 'tmap://view_path?dest=주차장명&dest_lat=위도&dest_lng=경도' 인텐트 실행",
+                    "모두 미설치 시 브라우저 내비(웹 페이지) 또는 앱 스토어로 직접 포워딩 처리"
+                ]
+            },
+            "BackgroundService": {
+                tag: "BACKGROUND SERVICE",
+                title: "목적지 지오펜싱(Geofencing) 백그라운드 등록",
+                desc: "길찾기가 시작되면 사용자가 목적지 주차장에 실질적으로 도달했는지를 모니터링하기 위해 단말 백그라운드에 가상의 경계선(Radius 100m)을 구축하여 위치 트래킹 서비스에 등록합니다.",
+                tech: "Google Play Services GeofencingClient, PendingIntent",
+                code: "app/src/main/java/com/.../service/GeofenceManager.java",
+                logic: [
+                    "목적지 주차장의 위경도 정보 추출",
+                    "Geofence.Builder를 사용하여 반경(100m) 및 진입 트리거(GEOFENCE_TRANSITION_ENTER) 속성 지정",
+                    "단말이 Sleep 모드로 들어가거나 백그라운드여도 동작하는 PendingIntent를 GeofencingClient에 추가",
+                    "시스템 자원 보존을 위해 최대 만료 시간(Expiration Duration)을 2시간 내외로 자동 제한 설정"
+                ]
+            },
+            "GeofenceTrigger": {
+                tag: "OS TRIGGER EVENT",
+                title: "지오펜싱 접근 감지 트리거",
+                desc: "Android OS 단의 위치 프레임워크가 실시간 GPS/Wi-Fi 신호를 측정하다가, 백그라운드에 등록된 주차장 반경 100m 내에 단말이 완전히 들어왔다고 판단하면 OS 레벨에서 PendingIntent 이벤트를 발생시키는 시스템 단계입니다.",
+                tech: "Google Play Location Services, Broadcast Receiver Event",
+                code: "System Level Trigger (Google Services Framework)",
+                logic: [
+                    "지정 지오펜스 영역 접근 검출",
+                    "OS는 백그라운드 상의 앱 프로세스가 깨어나도록 BroadcastReceiver로 등록된 PendingIntent를 브로드캐스트 전달",
+                    "네트워크가 불안정하더라도 GPS 좌표 하드웨어 센서 기반으로 높은 신뢰도로 감지 가능"
+                ]
+            },
+            "AppAutoLaunch": {
+                tag: "BROADCAST RECEIVER",
+                title: "BroadcastReceiver에 의한 앱 복귀 실행",
+                desc: "OS가 전달한 지오펜싱 트리거 이벤트를 수신하여 사용자가 내비 주행 중이더라도 목적지 접근 시점에 앱을 포그라운드로 복귀시키는 클래스입니다. Android OS 버전에 따른 백그라운드 액티비티 강제 실행 규제를 피해 Notification 알림 터치와 상단 팝업을 연계합니다.",
+                tech: "BroadcastReceiver, NotificationManager, Intent flags",
+                code: "app/src/main/java/com/.../receiver/GeofenceBroadcastReceiver.java",
+                logic: [
+                    "onReceive() 진입 시 GeofenceTransition 타입이 ENTER인지 판별",
+                    "즉시 시스템 상단 알림창에 헤드업(Heads-up) 고해상도 Notification 팝업 노출 ('주차장에 근접했습니다! 도면을 열어 빈자리를 확인하세요.')",
+                    "사용자가 해당 노티를 클릭하거나 기기 잠금이 풀려있을 경우 FLAG_ACTIVITY_NEW_TASK 플래그가 들어간 Intent로 ParkingDetailActivity를 포그라운드에 적재 실행"
+                ]
+            }
+        };
+
+        // Click Handler for Nodes
+        window.callNodeClick = function(nodeId) {
+            const nodeData = nodeDatabase[nodeId];
+            if (!nodeData) return;
+            
+            // Hide Empty State, Show Details
+            document.getElementById('empty-state').style.display = 'none';
+            const detailContainer = document.getElementById('detail-content');
+            detailContainer.classList.remove('hidden');
+            detailContainer.classList.add('flex');
+            
+            // Update Text Contents
+            document.getElementById('node-tag').textContent = nodeData.tag;
+            document.getElementById('node-id').textContent = nodeId;
+            document.getElementById('node-title').textContent = nodeData.title;
+            document.getElementById('node-desc').textContent = nodeData.desc;
+            document.getElementById('node-tech').textContent = nodeData.tech;
+            document.getElementById('node-code').textContent = nodeData.code;
+            
+            // Update Code Copy Action
+            document.getElementById('node-code-container').onclick = function() {
+                navigator.clipboard.writeText(nodeData.code);
+                alert("파일 경로가 클립보드에 복사되었습니다:\n" + nodeData.code);
+            };
+            
+            // Render Logic bullet points
+            const logicList = document.getElementById('node-logic');
+            logicList.innerHTML = '';
+            nodeData.logic.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'text-xs text-slate-600 dark:text-slate-300';
+                li.textContent = item;
+                logicList.appendChild(li);
+            });
+            
+            // Interactive Highlight node color in SVG
+            highlightNodeInSVG(nodeId);
+        };
+        
+        function highlightNodeInSVG(nodeId) {
+            // Reset existing highlights
+            document.querySelectorAll('.mermaid svg .node').forEach(node => {
+                node.style.filter = '';
+                node.style.strokeWidth = '';
+            });
+            
+            // Find and highlight target node
+            // Mermaid appends a suffix like "flowchart-MainActivity" or uses the nodeId as element ID or class
+            const svgNodes = document.querySelectorAll('.mermaid svg .node');
+            svgNodes.forEach(node => {
+                if (node.id.includes(nodeId) || node.classList.contains(nodeId) || (node.querySelector('span') && node.querySelector('span').innerText.includes(nodeId))) {
+                    node.style.filter = 'drop-shadow(0px 0px 12px rgba(139, 92, 246, 0.9))';
+                    node.style.stroke = '#8b5cf6';
+                    node.style.strokeWidth = '3px';
+                }
+            });
+        }
+
+        // Tab Switch Logic
+        window.switchTab = function(tabId) {
+            // Hide all tab contents
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Show target tab content
+            const targetContent = document.getElementById(tabId);
+            if (targetContent) {
+                targetContent.classList.add('active');
+            }
+            
+            // Set tab buttons styling
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('bg-brand-500', 'text-white', 'dark:bg-brand-500');
+                btn.classList.add('text-slate-500', 'dark:text-slate-400', 'hover:bg-slate-200/50', 'dark:hover:bg-slate-800');
+            });
+            
+            const targetBtn = document.getElementById('btn-' + tabId);
+            if (targetBtn) {
+                targetBtn.classList.remove('text-slate-500', 'dark:text-slate-400', 'hover:bg-slate-200/50', 'dark:hover:bg-slate-800');
+                targetBtn.classList.add('bg-brand-500', 'text-white', 'dark:bg-brand-500');
+            }
+            
+            // Reset Zoom
+            zoomReset();
+            
+            // Update Label
+            let label = "Flowchart";
+            if (tabId === 'tab-seq-fav') label = "Favorites Sequence";
+            else if (tabId === 'tab-seq-layout') label = "Realtime Layout Sequence";
+            else if (tabId === 'tab-seq-navi') label = "Navigation & Geofencing Sequence";
+            else if (tabId === 'tab-specs') label = "Architecture Specifications";
+            document.getElementById('diagram-title-label').textContent = label;
+            
+            // Re-render / refresh layout if needed (Mermaid parses SVG on load, so we just reset view transforms)
+            const activeSvg = targetContent.querySelector('svg');
+            if (activeSvg) {
+                activeSvg.style.transform = `scale(1) translate(0px, 0px)`;
+            }
+        };
+
+        // Theme Toggle (Dark / Light)
+        window.toggleTheme = function() {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+            // Optional: Re-render mermaid or adjust SVG styles for theme switch
+        };
+        
+        // Load preference
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        }
+
+        // SVG Pan and Zoom handlers
+        window.zoomDiagram = function(factor) {
+            currentScale *= factor;
+            // Bound zoom level
+            if (currentScale < 0.4) currentScale = 0.4;
+            if (currentScale > 3.0) currentScale = 3.0;
+            applyTransform();
+        };
+
+        window.zoomReset = function() {
+            currentScale = 1.0;
+            translateX = 0;
+            translateY = 0;
+            applyTransform();
+        };
+
+        function applyTransform() {
+            const activeTabContent = document.querySelector('.tab-content.active');
+            if (!activeTabContent) return;
+            const svg = activeTabContent.querySelector('svg');
+            if (svg) {
+                svg.style.transformOrigin = 'center center';
+                svg.style.transition = 'transform 0.15s ease-out';
+                svg.style.transform = `scale(${currentScale}) translate(${translateX}px, ${translateY}px)`;
+            }
+        }
+        
+        // Drag Pan functionality (Mouse down on SVG view)
+        let isDragging = false;
+        let startX, startY;
+        const container = document.getElementById('diagram-container');
+        
+        container.addEventListener('mousedown', (e) => {
+            // Only drag if clicking SVG or space, not text or interactive nodes
+            if (e.target.tagName === 'svg' || e.target.closest('svg') && !e.target.closest('.node')) {
+                isDragging = true;
+                container.style.cursor = 'grabbing';
+                startX = e.clientX - translateX;
+                startY = e.clientY - translateY;
+                e.preventDefault();
+            }
+        });
+        
+        window.addEventListener('mouseup', () => {
+            isDragging = false;
+            container.style.cursor = 'default';
+        });
+        
+        container.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            translateX = e.clientX - startX;
+            translateY = e.clientY - startY;
+            applyTransform();
+        });
+
+        // Download Diagram as SVG File
+        window.downloadSVG = function() {
+            const activeTabContent = document.querySelector('.tab-content.active');
+            if (!activeTabContent) return;
+            
+            const svgEl = activeTabContent.querySelector('svg');
+            if (!svgEl) {
+                alert("현재 탭에는 렌더링된 다이어그램이 없습니다.");
+                return;
+            }
+            
+            try {
+                // Clone the SVG to not modify current view
+                const clonedSvg = svgEl.cloneNode(true);
+                
+                // Clear any scale transforms on download
+                clonedSvg.style.transform = 'none';
+                
+                // Include Stylesheet
+                const styleSheet = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+                styleSheet.textContent = `
+                    /* Basic inline SVG styles for mermaid download */
+                    svg { background: #0f172a; color: #fff; padding: 20px; border-radius: 10px; }
+                    .node rect, .node circle, .node polygon { fill: #1e293b !important; stroke: #475569 !important; }
+                    .node.MainActivity rect, .node.ProfileActivity rect, .node.LoginActivity rect, .node.RegisterActivity rect, .node.EditProfileActivity rect, .node.SearchActivity rect { fill: #0369a1 !important; stroke: #0ea5e9 !important; }
+                    .node.ParkingDetailActivity rect { fill: #7c2d12 !important; stroke: #ea580c !important; }
+                    .node.NaviLauncher rect { fill: #581c87 !important; stroke: #8b5cf6 !important; }
+                    .node.CheckLogin polygon { fill: #f59e0b !important; stroke: #d97706 !important; }
+                    text { fill: #f8fafc !important; font-family: 'Outfit', sans-serif !important; }
+                    .edgePaths .edgePath .path { stroke: #64748b !important; stroke-width: 1.5px !important; }
+                    .edgeLabels .edgeLabel rect { fill: #0b0f19 !important; }
+                    .edgeLabels .edgeLabel text { fill: #94a3b8 !important; }
+                `;
+                clonedSvg.appendChild(styleSheet);
+                
+                const serializer = new XMLSerializer();
+                let source = serializer.serializeToString(clonedSvg);
+                
+                // Add name spaces if they are missing
+                if(!source.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)){
+                    source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+                }
+                if(!source.match(/^<svg[^>]+xmlns:xlink="http:\/\/www\.w3\.org\/1999\/xlink"/)){
+                    source = source.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
+                }
+                
+                // XML declaration
+                source = '<?xml version="1.0" encoding="utf-8"?>\n' + source;
+                
+                // Convert to Blob and download
+                const activeTabId = activeTabContent.id;
+                const filename = `UML_ParkingApp_${activeTabId.replace('tab-', '')}.svg`;
+                const url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(source);
+                
+                const downloadLink = document.createElement("a");
+                downloadLink.href = url;
+                downloadLink.download = filename;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+            } catch (err) {
+                console.error("SVG Download failed:", err);
+                alert("SVG 다운로드 처리 중 에러가 발생했습니다:\n" + err.message);
+            }
+        };
+    </script>
+</body>
+</html>

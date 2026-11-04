@@ -1,0 +1,17 @@
+{
+  "max_speed_cm_s": 35.0,
+  "position_noise_cm": 1.0,
+  "match_radius_cm": 10.0,
+  "cross_camera_radius_cm": 2.0,
+  "cross_camera_window_s": 1.0,
+  "observation_ttl_s": 1.5,
+  "ambiguity_margin_cm": 0.65,
+  "confirm_hits": 3,
+  "confirm_interval_s": 0.1,
+  "lost_after_s": 1.2,
+  "remove_after_s": 4.0,
+  "candidate_timeout_s": 1.5,
+  "removed_retention_s": 2.0,
+  "smoothing_tau_s": 0.15,
+  "prediction_horizon_s": 0.7
+}

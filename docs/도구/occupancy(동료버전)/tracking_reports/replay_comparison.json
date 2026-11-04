@@ -1,0 +1,9 @@
+{
+  "matched": true,
+  "state_change_rows": 107,
+  "excluded_columns": [
+    "wall"
+  ],
+  "baseline": "/Users/leejunsik/Desktop/PARKIT/runs/occupancy/logs/tracking_baseline/logs/20261103_010305/state_changes.csv",
+  "tracking_enabled": "/Users/leejunsik/Desktop/PARKIT/runs/occupancy/logs/tracking_enabled_regression/20261103_011725/state_changes.csv"
+}

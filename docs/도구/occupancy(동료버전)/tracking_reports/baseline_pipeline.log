@@ -1,0 +1,41 @@
+
+1부. 상태 기계 (P6, P5, P9, P10, T1~T8)
+  [통과] 켤 때 감시 칸 DYNAMIC_BLIND(INITIALIZING), 아닌 칸 STATIC_BLIND(NO_COVERAGE)
+  [통과] 2초에 차가 들어오면 3초 뒤 OCCUPIED, 10초에 빠지면 5초 뒤 EMPTY — [(5.0, 'OCCUPIED'), (15.0, 'EMPTY')]
+  [통과] OCCUPIED 중 1초 놓침은 상태를 바꾸지 않음 — [(3.0, 'OCCUPIED')]
+  [통과] 가림 1초 넘게 → DYNAMIC_BLIND(OCCLUDED, 직전 OCCUPIED), 풀린 뒤 3초 → OCCUPIED — [(3.0, 'OCCUPIED', None, None), (9.5, 'DYNAMIC_BLIND', 'OCCLUDED', 'OCCUPIED'), (15.0, 'OCCUPIED', None, None)]
+  [통과] 1초 이하 가림(지나가는 차)은 DYNAMIC_BLIND를 만들지 않음 — [(5.0, 'EMPTY')]
+  [통과] P9 한쪽 가려짐 → 다른 쪽 결과
+  [통과] P9 둘 다 정상인데 다르면 차 있음
+  [통과] P9 둘 다 가려짐 → 가려짐, 하나 끊김 + 하나 가려짐 → 가려짐
+  [통과] P10 A가 끊기면 A만 보는 1번은 DYNAMIC_BLIND(CAMERA_OFFLINE), 2번은 B로 그대로 — [(3.0, 'OCCUPIED', None, None), (10.0, 'DYNAMIC_BLIND', 'CAMERA_OFFLINE', 'OCCUPIED')] / [(3.0, 'OCCUPIED')]
+  [통과] P8 칸별 시간 값: 1번만 1초, 2번은 3초 — [(1.0, 1, 'OCCUPIED'), (3.0, 2, 'OCCUPIED')]
+
+2부. 합성 영상 두 개로 프로그램 전체 (보정 1920x1080, 영상 1280x720, 정답 상자)
+  영상: CAM-1.mp4, CAM-2.mp4  (CAM-1 감시 [1, 2, 3, 4, 5, 6, 7, 34, 35, 36, 37, 38, 39, 40, 41], CAM-2 감시 [8, 9, 10, 11, 12, 13, 14, 28, 29, 30, 31, 32, 33, 34, 35])
+  기록: /Users/leejunsik/Desktop/PARKIT/runs/occupancy/logs/tracking_baseline/logs/20261103_010305
+  [통과] 4번 → OCCUPIED 약 5.0s (E1 4번 입차 2초 + 3초) — 실제 5.0s
+  [통과] 4번 → EMPTY 약 25.0s (E1 4번 출차 20초 + 5초 (E7 통로 차가 13~17초에 가려도 그대로)) — 실제 25.0s
+  [통과] 6번 → EMPTY 약 5.0s (빈 칸 켠 뒤 5초) — 실제 5.0s, 21.0s
+  [통과] 6번 → DYNAMIC_BLIND OCCLUDED 약 11.5s (E3 6번 앞 통로 차 10초부터, 1초 넘게) — 실제 11.5s
+  [통과] 6번 → EMPTY 약 21.0s (E3 통로 차 16초에 떠남 + 5초) — 실제 5.0s, 21.0s
+  [통과] 5번 → DYNAMIC_BLIND OCCLUDED 약 14.5s (E3 + E7 통로 차가 함께 5번을 덮음 (13초부터, 1초 넘게)) — 실제 14.5s
+  [통과] 5번 → EMPTY 약 21.0s (E3가 16초에 떠나 E7 혼자로는 30% 아래 + 5초 (P5는 통로 차 상자들의 합집합)) — 실제 5.0s, 21.0s
+  [통과] 2번 → OCCUPIED 약 15.0s (E4 걸침 12초 + 3초 (2번)) — 실제 15.0s
+  [통과] 3번 → OCCUPIED 약 15.0s (E4 걸침 12초 + 3초 (3번)) — 실제 15.0s
+  [통과] 2번 → EMPTY 약 35.0s (E4 30초에 떠남 + 5초) — 실제 5.0s, 35.0s
+  [통과] 35번 → OCCUPIED 약 6.0s (E5 35번 3초 + 3초 (두 카메라)) — 실제 6.0s
+  [통과] 35번 → EMPTY 약 45.0s (E5 40초에 떠남 + 5초 (CAM-2 끊긴 뒤 CAM-1만으로)) — 실제 45.0s
+  [통과] 30번 → OCCUPIED 약 3.0s (E6 30번 처음부터 차, 3초) — 실제 3.0s
+  [통과] 30번 → DYNAMIC_BLIND CAMERA_OFFLINE 약 55.0s (E6 CAM-2 영상 25초에 끝 + 30초) — 실제 55.0s
+  [통과] 12번 → DYNAMIC_BLIND CAMERA_OFFLINE 약 55.0s (CAM-2만 보는 12번도 끊김) — 실제 55.0s
+  [통과] 차를 넣지 않은 칸은 OCCUPIED가 되지 않음 (지나가는 차 E2 포함) — []
+  [통과] 가려짐은 5·6번만 (E3 6번, E3+E7 통로 차가 함께 5번을 덮음. E2는 1초 안, 4번은 잘린 채 잡혀 차 있음 우선) — [5, 6]
+  [통과] 4번은 OCCUPIED(5초) → EMPTY(25초) 두 번만 바뀜 — [(5.0, 4, 'OCCUPIED', ''), (25.0, 4, 'EMPTY', '')]
+  [통과] CAM-2가 끊겨도 CAM-1이 보는 칸(34, 35번 포함)은 끊김이 되지 않음 — []
+  [통과] 끊김(CAMERA_OFFLINE)은 CAM-2만 보는 8~14, 28~33번 — [8, 9, 10, 11, 12, 13, 14, 28, 29, 30, 31, 32, 33]
+  [통과] 감시 칸이 아닌 칸 28개는 STATIC_BLIND (56 - 15 - 15 + 겹친 2) — 28개
+  [통과] frames.csv(L2)에 상자, 접점 좌표, 고른 칸, P2a/P5 표시가 남음 — 441줄, P2a 표시 8줄
+  [통과] 최대 속도와 20배속으로 돌린 상태 변화 기록이 같음 (C2) — 107줄 / 107줄
+
+합계: 33 / 33 통과

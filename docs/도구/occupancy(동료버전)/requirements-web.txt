@@ -1,0 +1,4 @@
+# Optional API only; existing detector/GUI dependencies are unchanged.
+fastapi==0.162.0
+uvicorn==0.54.0
+websockets==16.1.1

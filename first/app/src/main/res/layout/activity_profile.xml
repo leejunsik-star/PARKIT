@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:colorBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:padding="32dp"
+        android:paddingTop="48dp"
+        android:paddingBottom="48dp">
+
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@mipmap/ic_launcher_round"
+            android:layout_marginBottom="20dp" />
+
+        <!-- ========== 로그인된 상태 ========== -->
+        <LinearLayout
+            android:id="@+id/layout_logged_in"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:visibility="gone">
+
+            <!-- 이름 / 이메일 -->
+            <TextView
+                android:id="@+id/tv_user_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="이름"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="6dp" />
+
+            <TextView
+                android:id="@+id/tv_user_email"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="이메일"
+                android:textSize="15sp"
+                android:layout_marginBottom="24dp" />
+
+            <!-- 차량 정보 카드 -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                xmlns:app="http://schemas.android.com/apk/res-auto">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="차량 정보"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="12dp" />
+
+                    <TextView
+                        android:id="@+id/tv_compact_car"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="경차: -"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="6dp" />
+
+                    <TextView
+                        android:id="@+id/tv_electric_car"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="전기차: -"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="6dp" />
+
+                    <TextView
+                        android:id="@+id/tv_disabled"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="장애인 차량: -"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="6dp" />
+
+                    <TextView
+                        android:id="@+id/tv_national_merit"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="국가유공자: -"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="6dp" />
+
+                    <TextView
+                        android:id="@+id/tv_female_parking"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="여성배려주차: -"
+                        android:textSize="14sp" />
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- 정보 수정 버튼 -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_edit_profile"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="정보 수정"
+                android:textSize="16sp"
+                android:layout_marginBottom="12dp"
+                style="@style/Widget.Material3.Button.OutlinedButton" />
+
+            <!-- 로그아웃 버튼 -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_logout"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="로그아웃"
+                android:textSize="16sp"
+                android:backgroundTint="#E63946"
+                android:layout_marginBottom="12dp" />
+
+        </LinearLayout>
+
+        <!-- ========== 비로그인 상태 ========== -->
+        <LinearLayout
+            android:id="@+id/layout_logged_out"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="마이페이지"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="로그인하면 더 많은 기능을 이용할 수 있어요"
+                android:textSize="14sp"
+                android:gravity="center"
+                android:layout_marginBottom="40dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_go_login"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="로그인"
+                android:textSize="16sp"
+                android:layout_marginBottom="12dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_go_register"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="회원가입"
+                android:textSize="16sp"
+                style="@style/Widget.Material3.Button.OutlinedButton" />
+
+        </LinearLayout>
+
+        <!-- 공통: 닫기 버튼 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_close_profile"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="닫기"
+            android:textSize="16sp"
+            android:layout_marginTop="12dp"
+            style="@style/Widget.Material3.Button.OutlinedButton" />
+
+    </LinearLayout>
+</ScrollView>

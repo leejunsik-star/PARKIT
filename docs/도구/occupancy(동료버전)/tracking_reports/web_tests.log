@@ -1,0 +1,17 @@
+
+> parkit-parking-map@1.0.0 test
+> node --test src/*.test.js
+
+✔ interpolates, never extrapolates, heartbeat does not restart movement (1.026583ms)
+✔ lost selected ID never resolves to another car; removed selected ID stays missing (0.115875ms)
+✔ follow keeps the selected car at viewport center, including mat edge (0.113417ms)
+✔ WebSocket close reconnects and immediately accepts complete new state; cleanup stops retry (0.255958ms)
+✔ silent connection watchdog closes and schedules reconnect (0.673458ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 52.417791

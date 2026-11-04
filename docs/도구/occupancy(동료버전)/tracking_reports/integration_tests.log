@@ -1,0 +1,13 @@
+/Users/leejunsik/Desktop/PARKIT/.venv-gui/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+test_cut_contact_not_used_and_pending_times_are_sorted (__main__.IntegrationTests.test_cut_contact_not_used_and_pending_times_are_sorted) ... ok
+test_engine_results_slots_and_vehicle_ids (__main__.IntegrationTests.test_engine_results_slots_and_vehicle_ids) ... ok
+test_idle_network_client_does_not_block_producer (__main__.IntegrationTests.test_idle_network_client_does_not_block_producer) ... ok
+test_layout_and_full_snapshot_on_every_connection (__main__.IntegrationTests.test_layout_and_full_snapshot_on_every_connection) ... ok
+test_store_isolation_and_bounded_latest_snapshot (__main__.IntegrationTests.test_store_isolation_and_bounded_latest_snapshot) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.149s
+
+OK
+[판정] 끝 (t 4.0s). EMPTY 0, OCCUPIED 1, DYNAMIC_BLIND 14, STATIC_BLIND 41. 기록: /var/folders/71/h_dk54cj0gq94spfwxklxvx40000gp/T/tmp8b6kqw1q/logs/20261103_012025

@@ -1,0 +1,20 @@
+test_ambiguous_cross_camera_not_forced (__main__.VehicleTests.test_ambiguous_cross_camera_not_forced) ... ok
+test_assignment_matches_bruteforce (__main__.VehicleTests.test_assignment_matches_bruteforce) ... ok
+test_async_motion_not_averaged_as_same_time (__main__.VehicleTests.test_async_motion_not_averaged_as_same_time) ... ok
+test_camera_handoff (__main__.VehicleTests.test_camera_handoff) ... ok
+test_crossing_preserves_motion_identity (__main__.VehicleTests.test_crossing_preserves_motion_identity) ... ok
+test_distinct_cars_not_fused (__main__.VehicleTests.test_distinct_cars_not_fused) ... ok
+test_inference_latency_does_not_discard_new_frame (__main__.VehicleTests.test_inference_latency_does_not_discard_new_frame) ... ok
+test_invalid_unreliable_candidate_expiry (__main__.VehicleTests.test_invalid_unreliable_candidate_expiry) ... ok
+test_jump_does_not_teleport_old_id (__main__.VehicleTests.test_jump_does_not_teleport_old_id) ... ok
+test_missing_lost_removed_and_no_reused_id (__main__.VehicleTests.test_missing_lost_removed_and_no_reused_id) ... ok
+test_parallel_and_detection_order (__main__.VehicleTests.test_parallel_and_detection_order) ... ok
+test_simultaneous_same_car_and_distinct_hits (__main__.VehicleTests.test_simultaneous_same_car_and_distinct_hits) ... ok
+test_single_move_confirm_and_heading (__main__.VehicleTests.test_single_move_confirm_and_heading) ... ok
+test_stop_restart (__main__.VehicleTests.test_stop_restart) ... ok
+test_timestamps_stale_repeat_and_late (__main__.VehicleTests.test_timestamps_stale_repeat_and_late) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.017s
+
+OK

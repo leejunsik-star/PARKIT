@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:colorBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="32dp"
+        android:paddingTop="48dp"
+        android:paddingBottom="48dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="회원가입"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="정보를 입력해 계정을 만드세요"
+            android:textSize="14sp"
+            android:layout_marginBottom="32dp" />
+
+        <!-- 이름 -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="이름"
+            android:layout_marginBottom="16dp"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:maxLines="1" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 이메일 -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="이메일"
+            android:layout_marginBottom="16dp"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_email"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress"
+                android:maxLines="1" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 비밀번호 -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="비밀번호 (6자 이상)"
+            android:layout_marginBottom="16dp"
+            app:endIconMode="password_toggle"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:maxLines="1" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 비밀번호 확인 -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="비밀번호 확인"
+            android:layout_marginBottom="24dp"
+            app:endIconMode="password_toggle"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_password_confirm"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:maxLines="1" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 차량 정보 섹션 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="차량 정보 (해당 항목 선택)"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp" />
+
+        <CheckBox
+            android:id="@+id/cb_compact_car"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="경차"
+            android:textSize="15sp"
+            android:layout_marginBottom="8dp" />
+
+        <CheckBox
+            android:id="@+id/cb_electric_car"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="전기차"
+            android:textSize="15sp"
+            android:layout_marginBottom="8dp" />
+
+        <CheckBox
+            android:id="@+id/cb_disabled"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="장애인 차량"
+            android:textSize="15sp"
+            android:layout_marginBottom="8dp" />
+
+        <CheckBox
+            android:id="@+id/cb_national_merit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="국가유공자 차량"
+            android:textSize="15sp"
+            android:layout_marginBottom="8dp" />
+
+        <CheckBox
+            android:id="@+id/cb_female_parking"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="여성배려주차 이용 가능"
+            android:textSize="15sp"
+            android:layout_marginBottom="28dp" />
+
+        <!-- 회원가입 버튼 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_register"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="회원가입"
+            android:textSize="16sp"
+            android:layout_marginBottom="12dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_back_to_login"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="로그인으로 돌아가기"
+            android:textSize="16sp"
+            style="@style/Widget.Material3.Button.OutlinedButton" />
+
+    </LinearLayout>
+</ScrollView>

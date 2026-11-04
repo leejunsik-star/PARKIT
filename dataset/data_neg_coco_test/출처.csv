@@ -1,0 +1,31 @@
+﻿파일,COCO 번호,원본 주소,사진 속 물체(COCO 라벨)
+neg_coco_000000409268.jpg,000000409268,http://images.cocodataset.org/val2017/000000409268.jpg,teddy_bear
+neg_coco_000000567898.jpg,000000567898,http://images.cocodataset.org/val2017/000000567898.jpg,bowl cake carrot orange
+neg_coco_000000413247.jpg,000000413247,http://images.cocodataset.org/val2017/000000413247.jpg,backpack book bottle laptop mouse
+neg_coco_000000140929.jpg,000000140929,http://images.cocodataset.org/val2017/000000140929.jpg,clock
+neg_coco_000000251140.jpg,000000251140,http://images.cocodataset.org/val2017/000000251140.jpg,bicycle book person
+neg_coco_000000089045.jpg,000000089045,http://images.cocodataset.org/val2017/000000089045.jpg,book chair clock couch dining_table potted_plant vase
+neg_coco_000000062808.jpg,000000062808,http://images.cocodataset.org/val2017/000000062808.jpg,bottle cell_phone chair dining_table knife person pizza
+neg_coco_000000179642.jpg,000000179642,http://images.cocodataset.org/val2017/000000179642.jpg,bottle chair person tennis_racket
+neg_coco_000000215259.jpg,000000215259,http://images.cocodataset.org/val2017/000000215259.jpg,couch person remote
+neg_coco_000000377393.jpg,000000377393,http://images.cocodataset.org/val2017/000000377393.jpg,clock person umbrella
+neg_coco_000000295797.jpg,000000295797,http://images.cocodataset.org/val2017/000000295797.jpg,clock
+neg_coco_000000450303.jpg,000000450303,http://images.cocodataset.org/val2017/000000450303.jpg,bottle cell_phone chair clock dining_table laptop person
+neg_coco_000000019742.jpg,000000019742,http://images.cocodataset.org/val2017/000000019742.jpg,vase
+neg_coco_000000329455.jpg,000000329455,http://images.cocodataset.org/val2017/000000329455.jpg,chair cup dining_table person pizza
+neg_coco_000000223188.jpg,000000223188,http://images.cocodataset.org/val2017/000000223188.jpg,clock cow person
+neg_coco_000000195842.jpg,000000195842,http://images.cocodataset.org/val2017/000000195842.jpg,bowl chair clock couch person remote tv
+neg_coco_000000430286.jpg,000000430286,http://images.cocodataset.org/val2017/000000430286.jpg,bed remote
+neg_coco_000000017714.jpg,000000017714,http://images.cocodataset.org/val2017/000000017714.jpg,banana cup dining_table fork knife pizza spoon
+neg_coco_000000069795.jpg,000000069795,http://images.cocodataset.org/val2017/000000069795.jpg,potted_plant vase
+neg_coco_000000025986.jpg,000000025986,http://images.cocodataset.org/val2017/000000025986.jpg,bowl broccoli cup donut spoon
+neg_coco_000000283785.jpg,000000283785,http://images.cocodataset.org/val2017/000000283785.jpg,book person teddy_bear
+neg_coco_000000046378.jpg,000000046378,http://images.cocodataset.org/val2017/000000046378.jpg,bird cat
+neg_coco_000000447088.jpg,000000447088,http://images.cocodataset.org/val2017/000000447088.jpg,baseball_bat person
+neg_coco_000000245915.jpg,000000245915,http://images.cocodataset.org/val2017/000000245915.jpg,elephant
+neg_coco_000000297595.jpg,000000297595,http://images.cocodataset.org/val2017/000000297595.jpg,person surfboard
+neg_coco_000000504439.jpg,000000504439,http://images.cocodataset.org/val2017/000000504439.jpg,zebra
+neg_coco_000000122217.jpg,000000122217,http://images.cocodataset.org/val2017/000000122217.jpg,person skateboard
+neg_coco_000000494759.jpg,000000494759,http://images.cocodataset.org/val2017/000000494759.jpg,kite person
+neg_coco_000000024027.jpg,000000024027,http://images.cocodataset.org/val2017/000000024027.jpg,kite person
+neg_coco_000000164115.jpg,000000164115,http://images.cocodataset.org/val2017/000000164115.jpg,bicycle surfboard
