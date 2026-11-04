@@ -49,6 +49,8 @@ runs/
 eval_*_결과/_val/
 node_modules/
 dist/
+# 웹 지도 화면은 빌드 결과(약 240KB)를 올린다. 받는 컴퓨터에 Node가 없어도 되게(docs\33)
+!docs/도구/occupancy_v2/web/dist/
 .DS_Store
 Thumbs.db
 desktop.ini
