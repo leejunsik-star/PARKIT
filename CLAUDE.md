@@ -63,3 +63,11 @@
 
 \* 칸 표는 네 줄 모두 실측(docs\\30 5절)
 
+## git (2026-11-04)
+
+* Parkit 폴더는 git 저장소이고, GitHub hun509/parkit(비공개)에 올린다. 기본 브랜치는 main.
+* 커밋과 push는 사용자가 요청할 때만 한다. 동료와 같이 고칠 때는 브랜치를 만들어 Pull Request로 합친다.
+* 사진(dataset의 jpg·png), 영상(mp4), zip, split\_\*·handoff\_\* 폴더, 받은 큰 모델(yolo26n/s/m.pt, rtdetr-l.pt, mobileclip\_blt.ts 등)은 올리지 않는다(.gitignore). 사진과 영상은 구글 드라이브로 공유한다.
+* first\\app\\google-services.json(Firebase API 키)은 절대 올리지 않는다.
+* 학습한 모델(best.pt, models\\M\*.pt, 약 5MB)과 라벨 txt는 올린다. 100MB가 넘는 파일은 GitHub에 올라가지 않는다.
+
