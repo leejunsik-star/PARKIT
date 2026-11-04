@@ -30,7 +30,7 @@
   "car_width_cm": 3.2,
   "car_length_cm": 6.5,
   "car_height_cm": 2.0,
-  "straddle_min_cm": 1.0,
+  "straddle_min_cm": 0.1,
   "cut_overlap_ratio": 0.5,
   "side_overlap_ratio": 0.1,
   "cut_touch_ratio": 0.01,
