@@ -1,0 +1,92 @@
+# PARKIT 점유 판정 프로그램 — occupancy_v6 (v5 + 가로 주차 방향 추정)
+
+> **v6 (2026-11-07)**: occupancy_v5에 방향 추정을 더한 판이다(docs/40 문서). 칸에 선 차가 세로(칸과 같은 방향)인지 가로(칸과 수직)인지 상자 크기와 바닥 접점으로 고른다. 가로로 고른 차는 걸침(P3)에 차 길이를 써서 2칸·3칸을 막은 칸을 모두 "차 있음"으로 낸다. 대각선 카메라에서 두 방향이 비슷하게 맞으면 세로로 보고, 가로였다면 더 막았을 칸은 "모름"으로 둔다. 새 설정은 `orientation_enable`(false면 v5와 같음), `orient_*`, `expect_max_dist_side_cm`, `expect_max_depth_side_cm`. 고친 판정 코드는 `parkit_judge.py`, `parkit_geom.py`, `parkit_config.py`, `parkit_draw.py`(가로 차 상자에 ` H`). 비교 시험은 `test_orientation_compare.py`. occupancy_v5는 그대로 두었다.
+> 웹 지도(docs/42): 왼쪽 **보일 차량**에서 [전체 차량 / 주차 확정 차량 숨기기 / 주차칸 차량 모두 숨기기]를 고른다. 브라우저마다 따로 기억한다. `run.json`의 `vehicle_tracking.parked_vehicles`는 처음 열 때의 값이다.
+> 웹 지도(docs/43): 앞차에 가린 차와 화면 옆 끝에 걸린 차도 "위치 대략"(점선 아이콘)으로 보인다.
+> 화면 조작(docs/41): 보정 도구(v1, v2)의 감시 칸은 왼쪽 클릭·끌기로 켜고 오른쪽으로 끈다(지나간 칸 / 네모 안 칸). 보정 도구와 판정 프로그램의 평면도는 [도면 각도] 막대로 0~359° 돌리고, [카메라 시점]으로 카메라 화면과 같은 방향으로 본다.
+
+> **v5 (2026-11-07)**: occupancy_v4에서 통로 차에 아래가 잘린 차의 판정 구간(P2a)을 고친 판이다(docs/38 문서). 구간을 통로 차 가운데가 아니라 잘린 차 자기 시선 위에서 시작한다. 그래서 통로 차가 지나가는 자리에 따라 옆 칸이 `?`로 나오던 일이 줄었다. 또 가림(P5)에 칸에 선 차도 넣어, 낮은 카메라에서 앞차 뒤에 덮인 칸이 "차 없음"으로 나오지 않게 했다. 기준은 `occlusion_ratio_parked`(기본 0.9, `config/run.json`은 0.6)다. 고친 판정 코드는 `parkit_judge.py`, `parkit_config.py`다. occupancy_v4는 그대로 두었다.
+
+> **v4 (2026-11-04)**: occupancy_v3에 통로 차 접점 반 폭 보정을 더한 판이다(docs/36 문서). 웹 지도에 넣는 통로 차(kind aisle) 접점을 카메라에서 먼 쪽으로 차 폭의 반만큼 밀어, 반대쪽 카메라 두 대의 점이 한 대로 이어지게 한다. 칸에 선 차의 접점과 칸 판정은 v3와 같다. occupancy_v3는 그대로 두었다.
+
+> **v3 (2026-11-04)**: occupancy_v2에 동료의 11-04 수정(웹 지도 차량 아이콘을 이동 방향으로 회전)을 합친 판이다(docs/35 문서). occupancy_v2는 그대로 두었다. 아래 설명은 v2 때 쓴 것이며, 폴더 이름만 v3로 읽으면 된다.
+
+> 이 폴더는 `occupancy`(2026-11-04 판)에 동료가 만든 **웹 지도(차량 위치 추적)**를 합친 판이다(docs/33 문서).
+> 원본 두 폴더 `occupancy`, `occupancy(동료버전)`은 그대로 두었다. 웹 지도를 쓰지 않으면 `occupancy`와 똑같이 돈다.
+
+1:64 주차장 매트를 웹캠으로 찍어 칸마다 차가 있는지 판정한다. 이 폴더만 있으면 Windows와 맥에서 돈다.
+자세한 사용법은 같은 폴더의 `28_점유판정_프로그램_사용법.md`에 있다. 원본은 Parkit 저장소의 `docs/28_점유판정_프로그램_사용법.md`다.
+
+## 폴더 구성
+
+| 이름 | 내용 |
+|---|---|
+| `calibrate.py` | **실행.** 보정 도구: 카메라마다 기준점을 찍고 감시 칸을 골라 `config/cam_<이름>.json`에 저장 |
+| `occupancy.py` | **실행.** 판정 프로그램: 웹캠·영상에서 차를 찾아 칸 상태를 화면과 `logs/`에 낸다 |
+| `parkit_*.py` | 위 두 프로그램이 불러 쓰는 모듈 |
+| `test_geometry.py`, `test_pipeline.py` | 합성 시험 (코드를 고친 뒤 확인용) |
+| `test_orientation_compare.py` | 가로 주차 합성 시험: 옆 폴더 occupancy_v5와 결과를 표로 비교 (docs/40) |
+| `make_handoff.py` | 이 폴더를 남에게 보낼 묶음(zip)으로 만들기 |
+| `requirements.txt` | 설치할 라이브러리 |
+| `config/` | 실행 설정(`run.json`, `run_2대.json`)과 카메라 보정 파일(`cam_*.json`) |
+| `data/칸표_매트좌표_초안.json` | 칸 56개의 매트 좌표 |
+| `models/M8.pt` | 차 탐지 모델 (YOLO26n, 클래스 car). 기본 모델 |
+| `models/mymodel_*.pt`, `models/model.py` | 직접 만든 PARKIT Tiny 모델과 구조 파일. 판정 프로그램 창의 [모델]에서 고른다 |
+| `logs/` | 실행 기록 |
+
+## 설치
+
+Python은 Windows 3.9 이상, 맥은 **python.org의 Python 3.12**를 쓴다(맥의 시스템 파이썬은 창이 꺼진다).
+
+**Windows**
+```
+cd occupancy
+python -m pip install -r requirements.txt
+```
+
+**맥**
+```
+python3.12 -m venv .venv-gui
+source .venv-gui/bin/activate
+cd occupancy
+python -m pip install -r requirements.txt
+```
+처음 웹캠을 열 때 터미널(또는 VS Code)의 카메라 사용을 허용한다(시스템 설정 → 개인정보 보호 및 보안 → 카메라).
+필요한 라이브러리와 버전 조건, 설치 확인 방법은 28 문서 2절에 있다.
+
+## 빠른 시작
+
+1. 웹캠을 매트 옆에 고정한다.
+2. 보정한다. 기준점 6~8개를 찍고 S로 저장한다.
+   ```
+   python calibrate.py
+   ```
+   - 시작 창에서 웹캠 미리보기를 보고 CAM-1, CAM-2마다 쓸 웹캠 번호를 고른 뒤 [보정 시작]. 보정 창의 [입력] 칸에서도 카메라를 바꿀 수 있다.
+   - 시작 창 없이 열려면 `python calibrate.py --cam CAM-1 --source 0` (또는 `--no-picker`).
+   - 같이 온 `config/cam_CAM-1.json`은 보낸 사람의 카메라 자리에서 한 보정이다. 카메라 자리가 다르면 다시 찍는다.
+3. 판정한다.
+   ```
+   python occupancy.py
+   ```
+   - 녹화 영상으로 돌리려면 `python occupancy.py --source CAM-1=녹화.mp4`
+   - 시작 창에서 쓸 카메라(1대, 2대)와 웹캠 번호를 고르고 [판정 시작]. 판정 창의 [카메라 고르기…]로 다시 고를 수 있다.
+   - 시작 창 없이: `python occupancy.py --no-picker` (run.json), `python occupancy.py --run config/run_2대.json` (2대)
+
+두 프로그램 모두 창에서 **? 키**를 누르면 단축키 표가 나온다. 웹캠 번호, 해상도, 모델, 신뢰도, 분석 간격은 창에서 고른다.
+
+## 웹 지도 (선택)
+
+판정 결과와 차량 위치를 브라우저의 주차장 도면에 실시간으로 보여 준다. 자세한 것은 `TRACKING.md`.
+
+1. 처음 한 번: `python -m pip install -r requirements-web.txt` (Python 3.9도 된다. Node는 필요 없다)
+2. `python occupancy.py` → 시작 창에서 **[웹 지도 켜기]** 체크 → [판정 시작]
+3. 판정 창의 **[웹 지도 열기]** 또는 브라우저에서 `http://127.0.0.1:8765`
+- 카메라 없이 지도만 보기: `python tracking_demo.py`
+
+## 확인 (선택)
+```
+python test_geometry.py
+python test_pipeline.py
+```
+둘 다 마지막에 "합계: N / N 통과"가 나오면 된다.
+웹 지도 시험(웹 라이브러리 설치 뒤): `python test_vehicle_tracker.py`, `python test_tracking_integration.py`, `python test_tracking_replay.py`
