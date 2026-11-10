@@ -20,6 +20,7 @@ import argparse, datetime, os, sys, time
 import cv2
 import numpy as np
 
+from camera_input import parse_source, validate_source, LARIX_INPUTS
 from parkit_config import CONFIG_DIR, DEFAULT_RUN, Params, cam_config_path, load_json, load_run, save_json
 from parkit_draw import PlanView, camera_view_angle, poly, read_image, save_image, text
 from parkit_geom import (REF_KINDS, CamGeom, SlotTable, apply_h, aspect_same, auto_monitored, edited_to_inner,
@@ -180,7 +181,7 @@ class CalSource:
         self.req = tuple(size)
         self.frozen = None
         if cam is not None:
-            self.source, self.image, self.kind = int(cam), None, "live"
+            self.source, self.image, self.kind = parse_source(cam), None, "live"
         if self.open():
             return True
         if self.kind == "live":
@@ -245,6 +246,7 @@ class CalibModel:
     def __init__(self, name, source, cfg, table, params, size):
         self.name, self.source, self.cfg, self.table, self.params = name, source, cfg, table, params
         self.size = tuple(size)
+        self.contact_mode = "ground"
         self.refs_all = {r["id"]: r for r in ref_points(table)}
         self.refs = []                 # [{"id", "mat", "px"}]
         self.sel_ref = None            # 다음에 클릭으로 찍을 기준점
@@ -279,6 +281,8 @@ class CalibModel:
             self.notes.append(f"새 카메라 설정을 만듭니다: {os.path.basename(self.path)}")
             return
         d = load_json(self.path)
+        from camera_contact import contact_mode
+        self.contact_mode = contact_mode(d)
         cal = tuple(d.get("calib_size", self.size))
         if not aspect_same(cal, self.size):
             self.notes.append(f"저장된 보정 해상도 {cal[0]}x{cal[1]}와 지금 화면 {self.size[0]}x{self.size[1]}의 "
@@ -337,6 +341,7 @@ class CalibModel:
                                               self.cfg["calib"].get("auto_margin_px", 0),
                                               ref_mats=[r["mat"] for r in self.refs])
             self.monitored = set(cam["monitored"])
+        cam["contact_mode"] = self.contact_mode
         self.cam = cam
         self.err = {r["id"]: r["err_cm"] for r in cam["ref_points"]}
         self.geom = CamGeom(cam, self.table, self.size, self.params)
@@ -854,14 +859,14 @@ class CalibModel:
 
 # ---------------------------------------------------------------- 카메라 고르기 (시작 창)
 
-MAX_WEBCAMS = 5               # 웹캠 0~4번을 찾아본다 (capture_winmac.py와 같음)
-THUMB_W = 320                 # 미리보기 폭 (픽셀)
+MAX_WEBCAMS = 8               # 웹캠·DroidCam 가상 카메라 0~7번
+THUMB_W = 220                 # 미리보기 폭 (픽셀)
 
 
 def camera_names(cfg, config_dir=CONFIG_DIR):
     """고를 수 있는 카메라 이름: 저장된 보정 파일 + 실행 설정의 카메라 + CAM-1, CAM-2."""
     import glob
-    names = {"CAM-1", "CAM-2"}
+    names = {"CAM-1", "CAM-2", "CAM-3", "CAM-4"}
     for d in {config_dir, CONFIG_DIR}:
         for p in glob.glob(os.path.join(d, "cam_*.json")):
             names.add(os.path.basename(p)[4:-5])
@@ -878,7 +883,7 @@ WEBCAM_MAP = os.path.join(CONFIG_DIR, "webcams.json")     # 카메라 이름 →
 def load_webcam_map():
     try:
         d = load_json(WEBCAM_MAP)
-        return {str(k): int(v) for k, v in d.get("webcams", {}).items()}
+        return {str(k): parse_source(v) for k, v in d.get("webcams", {}).items()}
     except (OSError, ValueError, AttributeError, TypeError):
         return {}
 
@@ -886,7 +891,7 @@ def load_webcam_map():
 def save_webcam_map(mapping):
     save_json(WEBCAM_MAP, {"_설명": "카메라 이름 → 웹캠 번호. calibrate.py 시작 창이 쓰고 읽는다. "
                                      "판정에는 보정 파일(cam_<이름>.json)의 source가 쓰이고, 이 표는 보정 전 카메라의 번호도 기억한다",
-                            "webcams": {k: int(v) for k, v in sorted(mapping.items())}})
+                            "webcams": {k: parse_source(v) for k, v in sorted(mapping.items())}})
 
 
 def saved_camera(name, path_of=cam_config_path):
@@ -911,7 +916,7 @@ def file_source(path):
 def set_saved_source(path, src):
     """보정 파일의 웹캠 번호만 바꾼다(다시 보정하지 않고 USB 순서가 바뀐 것을 맞출 때)."""
     d = load_json(path)
-    d["source"] = int(src)
+    d["source"] = parse_source(src)
     save_json(path, d)
 
 
@@ -936,7 +941,8 @@ class CamPicker:
         self.names = sorted(set(camera_names(cfg, config_dir)) | set(self.map))
         self.build()
         self.root.protocol("WM_DELETE_WINDOW", self.quit)
-        self.root.after(100, self.probe_all)
+        # 자동 USB 탐색은 macOS 연속성 카메라를 켜 Larix 송출을 방해할 수 있다.
+        self.root.after(100, self.refresh)
 
     def build(self):
         tk, ttk = self.tk, self.ttk
@@ -949,7 +955,7 @@ class CamPicker:
         self.cells = []
         for i in range(MAX_WEBCAMS):
             f = ttk.Frame(self.grid, padding=3)
-            f.grid(row=i // 3, column=i % 3)
+            f.grid(row=i // 4, column=i % 4)
             c = tk.Canvas(f, width=THUMB_W, height=THUMB_W * 9 // 16, bg="#2d2d2d", highlightthickness=0)
             c.pack()
             lab = ttk.Label(f, text=f"웹캠 {i}번: 찾는 중…")
@@ -957,10 +963,10 @@ class CamPicker:
             self.cells.append((c, lab))
         rr = ttk.Frame(r)
         rr.pack(fill="x", padx=8, pady=(2, 6))
-        ttk.Button(rr, text="웹캠 다시 찾기", command=self.probe_all).pack(side="left")
+        ttk.Button(rr, text="USB/연속성 웹캠 찾기 (Larix는 주소 선택)", command=self.probe_all).pack(side="left")
         ttk.Label(rr, text="USB를 다시 꽂았거나 다른 프로그램(카메라 앱, occupancy.py)을 닫았으면 누르세요.",
                   foreground="#555").pack(side="left", padx=8)
-        box = ttk.LabelFrame(r, text="카메라마다 쓸 웹캠 (● = 이번에 보정할 카메라)", padding=6)
+        box = ttk.LabelFrame(r, text="카메라별 입력 (Larix: 수신기를 켜고 phone1/phone2 주소 선택)", padding=6)
         box.pack(fill="x", padx=8)
         self.box = box
         self.sel = tk.StringVar(value=self.names[0])
@@ -978,7 +984,7 @@ class CamPicker:
         rr = ttk.Frame(r)
         rr.pack(fill="x", padx=8, pady=(4, 8))
         ttk.Button(rr, text="보정 시작", style="Accent.TButton", command=self.start).pack(side="left")
-        ttk.Button(rr, text="웹캠 번호만 저장", command=self.save_sources).pack(side="left", padx=6)
+        ttk.Button(rr, text="입력 번호·주소 저장", command=self.save_sources).pack(side="left", padx=6)
         ttk.Button(rr, text="끝내기", command=self.quit).pack(side="left")
         ttk.Label(rr, text="웹캠 번호만 저장 = 다시 보정하지 않고 카메라마다 웹캠 번호만 저장한다(USB 순서가 바뀌었을 때)",
                   foreground="#555").pack(side="left", padx=8)
@@ -987,7 +993,7 @@ class CamPicker:
     def stored(self, name):
         """저장된 웹캠 번호: 보정 파일의 source가 먼저, 없으면 webcams.json."""
         path, src, date = saved_camera(name, self.path_of)
-        if not isinstance(src, int):
+        if src is None:
             src = self.map.get(name)
         return path, src, date
 
@@ -997,16 +1003,17 @@ class CamPicker:
         row = ttk.Frame(self.box)
         row.pack(fill="x", pady=1)
         ttk.Radiobutton(row, text=name, variable=self.sel, value=name, width=10, command=self.refresh).pack(side="left")
-        ttk.Label(row, text="웹캠").pack(side="left")
-        if isinstance(src, int):
+        ttk.Label(row, text="번호 / Larix 주소").pack(side="left")
+        if src is not None:
             default = src
         else:                                       # 처음 보는 카메라: 아직 아무도 안 쓰는 가장 작은 번호
-            taken = {int(v["var"].get()) for v in self.rows.values()}
+            taken = {parse_source(v["var"].get()) for v in self.rows.values()}
             default = next((i for i in range(MAX_WEBCAMS) if i not in taken), 0)
         var = tk.StringVar(value=str(default))
-        cb = ttk.Combobox(row, textvariable=var, values=[str(i) for i in range(MAX_WEBCAMS)], width=3, state="readonly")
+        cb = ttk.Combobox(row, textvariable=var, values=[str(i) for i in range(MAX_WEBCAMS)] + LARIX_INPUTS, width=38)
         cb.pack(side="left", padx=(4, 10))
         cb.bind("<<ComboboxSelected>>", lambda e: self.refresh())
+        cb.bind("<FocusOut>", lambda e: self.refresh())
         info = ttk.Label(row, text="", foreground="#555")
         info.pack(side="left")
         self.rows[name] = {"var": var, "path": path, "src": src, "date": date, "info": info}
@@ -1077,22 +1084,22 @@ class CamPicker:
         lab.configure(text=f"웹캠 {i}번" + (f" → {who}" if who else " (안 씀)"))
 
     def picks(self):
-        return {n: int(r["var"].get()) for n, r in self.rows.items()}
+        return {n: parse_source(r["var"].get()) for n, r in self.rows.items()}
 
     def refresh(self):
         """고른 값이 바뀔 때마다: 미리보기의 카메라 이름, 줄마다 저장된 값과 다른지, 경고를 다시 그린다."""
         for n, r in self.rows.items():
-            s = int(r["var"].get())
+            s = parse_source(r["var"].get())
             if r["path"]:
                 base = f"보정 파일 {os.path.basename(os.path.dirname(r['path']))}/{os.path.basename(r['path'])} (저장 {r['date']})"
             else:
                 base = "보정 파일 없음 (새로 보정)"
             if r["src"] is None:
-                state, color = "저장된 웹캠 번호 없음", "#555"
+                state, color = "저장된 입력 없음", "#555"
             elif r["src"] == s:
-                state, color = f"저장된 웹캠 {r['src']}번", "#555"
+                state, color = f"저장된 입력 {r['src']}", "#555"
             else:
-                state, color = f"저장 {r['src']}번 → {s}번 (저장 안 됨)", "#c00000"
+                state, color = f"저장 {r['src']} → {s} (저장 안 됨)", "#c00000"
             r["info"].configure(text=f"{base} · {state}", foreground=color)
         for i in range(MAX_WEBCAMS):
             self.draw_cell(i)
@@ -1106,7 +1113,7 @@ class CamPicker:
             used.setdefault(s, []).append(n)
         for s, ns in used.items():
             if len(ns) > 1:
-                w.append(f"웹캠 {s}번을 {', '.join(ns)}가 같이 씁니다. 카메라가 2대면 서로 다른 번호를 고르세요.")
+                w.append(f"웹캠 {s}번을 {', '.join(ns)}가 같이 씁니다. 각 장치는 서로 다른 번호를 고르세요.")
         for n, s in self.picks().items():
             if s in self.found and self.found[s] is None:
                 w.append(f"{n}에 고른 웹캠 {s}번이 지금 연결돼 있지 않습니다."
@@ -1118,6 +1125,11 @@ class CamPicker:
         """카메라마다 고른 웹캠 번호를 저장한다:
         webcams.json(모든 카메라) + 보정 파일의 source(보정한 카메라, 원본 config 와 v2 둘 다)."""
         picks = self.picks()
+        try:
+            picks = {n: validate_source(s) for n, s in picks.items()}
+        except ValueError as exc:
+            self.mb.showerror("입력 주소", str(exc))
+            return
         self.map.update(picks)
         save_webcam_map(self.map)
         changed = []
@@ -1141,7 +1153,11 @@ class CamPicker:
 
     def start(self):
         n = self.sel.get()
-        s = self.picks()[n]
+        try:
+            s = validate_source(self.picks()[n])
+        except ValueError as exc:
+            self.mb.showerror("입력 주소", str(exc))
+            return
         if self.found.get(s, "?") is None:
             if not self.mb.askyesno("웹캠", f"웹캠 {s}번이 연결돼 있지 않습니다. 그래도 열어 볼까요?"):
                 return
@@ -1271,15 +1287,25 @@ class CalibApp:
         self.name_cb.bind("<Return>", lambda e: self.change_camera())
         ttk.Button(rr, text="바꾸기", command=self.change_camera).pack(side="left")
         ttk.Label(rr, text="(새 이름을 적어도 됨)", foreground="#555").pack(side="left", padx=4)
+        rr = ttk.Frame(f)
+        rr.pack(fill="x", pady=4)
+        ttk.Label(rr, text="촬영 방식").pack(side="left")
+        from camera_contact import MODE_LABELS
+        self.contact_var = tk.StringVar(value=MODE_LABELS[self.m.contact_mode])
+        cb = ttk.Combobox(rr, textvariable=self.contact_var, values=list(MODE_LABELS.values()),
+                          width=29, state="readonly")
+        cb.pack(side="left", padx=4)
+        cb.bind("<<ComboboxSelected>>", self.change_contact_mode)
+        ttk.Label(f, text="아이폰 상부: 박스 중앙 / 웹캠 사선: 기존 접점\nDroidCam 영상에 추가 렌즈 왜곡 보정을 적용하지 않습니다.",
+                  foreground="#555").pack(anchor="w")
         self.src_var = tk.StringVar()
         ttk.Label(f, textvariable=self.src_var).pack(anchor="w", pady=(2, 0))
         rr = ttk.Frame(f)
         rr.pack(fill="x", pady=(4, 0))
-        ttk.Label(rr, text="웹캠").pack(side="left")
-        cur = str(self.src.source) if self.src.kind == "live" and source_kind(self.src.source) == "camera" else "0"
+        ttk.Label(rr, text="번호 / Larix 주소").pack(side="left")
+        cur = str(self.src.source) if self.src.kind == "live" else "0"
         self.cam_var = tk.StringVar(value=cur)
-        ttk.Combobox(rr, textvariable=self.cam_var, values=[str(i) for i in range(5)], width=3,
-                     state="readonly").pack(side="left", padx=(4, 8))
+        ttk.Combobox(rr, textvariable=self.cam_var, values=[str(i) for i in range(MAX_WEBCAMS)] + LARIX_INPUTS, width=32).pack(side="left", padx=(4, 8))
         ttk.Label(rr, text="해상도").pack(side="left")
         self.res_var = tk.StringVar(value=f"{self.m.size[0]}x{self.m.size[1]}")
         ttk.Combobox(rr, textvariable=self.res_var, values=RES_CHOICES, width=11).pack(side="left", padx=4)
@@ -1572,6 +1598,12 @@ class CalibApp:
             m.suggest_next()
         return m
 
+    def change_contact_mode(self, event=None):
+        from camera_contact import MODE_LABELS
+        self.m.contact_mode = next(k for k, v in MODE_LABELS.items() if v == self.contact_var.get())
+        self.m.changed()
+        self.msg = "촬영 방식을 바꿨습니다. 저장(S)하면 이 카메라에만 적용됩니다."
+
     def title_text(self):
         return f"PARKIT 보정 도구 — {self.m.name}"
 
@@ -1599,14 +1631,15 @@ class CalibApp:
             if a:
                 self.save()
         path, src, _ = saved_camera(name, lambda n: os.path.join(os.path.dirname(self.m.path), f"cam_{n}.json"))
-        cur = int(self.src.source) if self.src.kind == "live" and source_kind(self.src.source) == "camera" else None
-        if not isinstance(src, int):
-            src = cur if cur is not None else 0
+        cur = parse_source(self.src.source) if self.src.kind == "live" else None
+        if src is None:
+            src = load_webcam_map().get(name, cur if cur is not None else 0)
         if cur != src or self.src.kind != "live":
             self.freeze_var.set(False)
             if not self.src.reopen(self.m.size, src):
-                self.mb.showerror("웹캠", f"{name}의 웹캠 {src}번을 열지 못했습니다. 지금 화면으로 계속합니다.\n{self.src.msg}")
-                src = cur if cur is not None else src
+                self.mb.showerror("영상 입력", f"{name}의 입력 {src}을 열지 못했습니다. 이전 카메라를 유지합니다.\n{self.src.msg}")
+                self.name_var.set(self.m.name)
+                return
             self.frame = self.first_frame()
         size = (self.frame.shape[1], self.frame.shape[0])
         self.m = self.make_model(name, src, size)
@@ -1629,8 +1662,12 @@ class CalibApp:
         except ValueError:
             self.mb.showwarning("해상도", "해상도는 1920x1080 처럼 적으세요.")
             return
-        cam = int(self.cam_var.get())
-        same_cam = self.src.kind == "live" and source_kind(self.src.source) == "camera" and int(self.src.source) == cam
+        try:
+            cam = validate_source(self.cam_var.get())
+        except ValueError as exc:
+            self.mb.showerror("입력 주소", str(exc))
+            return
+        same_cam = self.src.kind == "live" and parse_source(self.src.source) == cam
         if not same_cam and self.m.refs:
             if not self.mb.askyesno("웹캠 바꾸기", f"웹캠 {cam}번으로 바꿉니다. 다른 카메라라면 찍은 기준점이 맞지 않으니 "
                                     f"다시 찍어야 합니다. 계속할까요?"):
@@ -2041,6 +2078,8 @@ class CalibApp:
         self.guide_var.set(m.guide())
         if self.show_lines_var.get() != m.show_lines:
             self.show_lines_var.set(m.show_lines)
+        from camera_contact import MODE_LABELS
+        self.contact_var.set(MODE_LABELS[self.m.contact_mode])
         self.src_var.set(self.src.describe(self.frame) + ("  · 멈춤" if self.src.frozen is not None else ""))
         # 마우스 안내
         hint = ""

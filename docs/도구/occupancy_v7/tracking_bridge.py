@@ -49,11 +49,12 @@ PARKED_MODES = ("show", "hide_occupied", "aisle_only")
 
 class TrackingBridge:
     def __init__(self, table, config=None, clock='wall', camera_ids=(), mode='detection',
-                 contact_shift_cm=0.0):
+                 contact_shift_cm=0.0, normalize_slot_centers=False):
         # v4: 통로 차(kind aisle) 접점을 카메라에서 먼 쪽으로 미는 거리(cm). 반대쪽 카메라 두 대가
         # 같은 통로 차를 차 폭만큼 다른 곳(가까운 옆면)에 찍는 차이를 줄인다(docs/36).
         # 설정 vehicle_tracking.aisle_contact_shift_cm 이 있으면 그 값, 없으면 contact_shift_cm(기본: 차 폭의 반).
         # 0이면 보정하지 않는다. 칸에 선 차(slot 등)의 접점은 그대로 보낸다
+        self.normalize_slot_centers = normalize_slot_centers
         config = dict(config or {})
         self.contact_shift_cm = float(config.pop("aisle_contact_shift_cm", contact_shift_cm))
         if not self.contact_shift_cm >= 0:
@@ -77,6 +78,18 @@ class TrackingBridge:
         """추적기에 넣을 매트 점(기본은 접점, point를 주면 그 점). 통로 차만 far_dir(카메라 반대쪽)로
         contact_shift_cm 민다. geom(카메라 CamGeom)이 없거나 보정 거리가 0이면 그대로."""
         x, y = map(float, b.contact_mat if point is None else point)
+        if geom is not None and getattr(geom, 'contact_mode', 'ground') == 'center':
+            return x, y                 # 상부 중앙에 사선 카메라용 이동 보정을 더하지 않는다.
+        if (self.normalize_slot_centers and geom is not None and b.kind == 'slot'
+                and b.slot is not None and b.slot_mat is not None):
+            # 혼합 시점: 사선의 칸 예상 접점을 차량 중심에 맞춰 상부 중앙과 비교한다.
+            import numpy as np
+            from parkit_geom import apply_h
+            expected = geom.expected_horiz.get(b.slot) if b.orient == 'horiz' else geom.expected.get(b.slot)
+            if expected is not None:
+                q = np.asarray(b.slot_mat) - expected + geom.table[b.slot].center
+                px = apply_h(np.linalg.inv(geom.slot_H[b.slot]), [q])
+                return tuple(apply_h(geom.H, px)[0])
         if geom is None or self.contact_shift_cm <= 0 or b.kind != 'aisle':
             return x, y
         d = geom.far_dir((x, y))
@@ -94,6 +107,9 @@ class TrackingBridge:
             cut = getattr(b, 'cut_by', None) is not None or b.kind in ('uncertain', 'slot_cut')
             approx_mat = getattr(b, 'approx_mat', None)
             approx, ok = None, True
+            if getattr(geom, "contact_mode", "ground") == "center" and (b.edge or b.kind == "uncertain"):
+                self.rejected_contacts += 1
+                continue
             if cut:
                 approx, ok = 'cut', approx_mat is not None
             elif b.edge:

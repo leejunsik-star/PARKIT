@@ -229,6 +229,9 @@ def _cover_ratio(region, boxes):
 
 def judge_frame(geom, params, dets):
     """dets: [(x1, y1, x2, y2, conf), ...] (실행 해상도 픽셀). 돌려주는 것: FrameResult."""
+    if getattr(geom, "contact_mode", "ground") == "center":
+        from camera_contact import judge_center
+        return judge_center(geom, params, dets)
     res = FrameResult()
     W, H = geom.size
     boxes = [BoxResult(i, d[:4], d[4] if len(d) > 4 else 1.0) for i, d in enumerate(dets)]

@@ -188,8 +188,13 @@ class VehicleTracker:
         # v6: 대략 위치(가림·화면 끝)가 끼면 그 오차만큼 여유를 더 준다. 대략 위치가 없으면 예전과 같다 (docs/43)
         slack = c.approx_radius_cm if (ob.approx or self._latest_approx(tr)) else 0.
         p = self._ob_point(tr, ob)
-        delta = distance(tr.raw, p)
-        if delta > c.max_speed_cm_s * max(0., dt) + c.position_noise_cm + slack:
+        own = tr.sources.get(ob.camera_id)
+        fresh_own = own is not None and 0 <= ob.observed_at - own.observed_at <= c.lost_after_s
+        origin = (own.x, own.y) if fresh_own else tr.raw
+        motion_dt = ob.observed_at - own.observed_at if fresh_own else dt
+        noise = c.position_noise_cm if fresh_own else max(c.position_noise_cm, c.cross_camera_radius_cm)
+        delta = distance(origin, p)
+        if delta > c.max_speed_cm_s * max(0., motion_dt) + noise + slack:
             return None
         err = distance(self._prediction(tr, ob.observed_at), p)
         gate = min(c.match_radius_cm, c.position_noise_cm + c.max_speed_cm_s * max(0., dt) + slack)
@@ -209,7 +214,10 @@ class VehicleTracker:
         if not known:
             if dt > c.cross_camera_window_s:
                 return None
-            gate = min(gate, cross)
+            gate = min(c.match_radius_cm, cross)
+        elif len(tr.sources) > 1:
+            # 거의 동시에 보는 여러 카메라의 보정 오차를 순간이동으로 보지 않는다.
+            gate = min(c.match_radius_cm, max(gate, cross))
         return err + penalty if err <= gate else None
 
     def update(self, camera_id, observed_at, observations, now=None):

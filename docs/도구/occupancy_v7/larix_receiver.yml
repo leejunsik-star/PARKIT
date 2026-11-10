@@ -1,0 +1,28 @@
+# Larix RTSP 송출 -> PARKIT 수신. 시연용 같은 LAN에서 사용.
+logLevel: info
+rtsp: true
+rtspAddress: :8554
+rtspTransports: [tcp]
+rtmp: false
+hls: false
+webrtc: false
+srt: false
+moq: false
+authMethod: internal
+authInternalUsers:
+  - user: any
+    ips: [127.0.0.0/8, '::1', 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 'fc00::/7', 'fe80::/10']
+    permissions:
+      - action: publish
+        path: ''
+      - action: read
+        path: ''
+paths:
+  phone1:
+    source: publisher
+  phone2:
+    source: publisher
+  phone3:
+    source: publisher
+  phone4:
+    source: publisher

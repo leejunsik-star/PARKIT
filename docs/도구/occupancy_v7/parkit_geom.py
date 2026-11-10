@@ -347,6 +347,8 @@ class CamGeom:
     """
 
     def __init__(self, cam, table, run_size, params):
+        from camera_contact import contact_mode
+        self.contact_mode = contact_mode(cam)
         self.name = cam.get("name", "CAM")
         self.table = table
         cal = tuple(cam["calib_size"])

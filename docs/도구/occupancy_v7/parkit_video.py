@@ -103,12 +103,14 @@ class LiveSource(threading.Thread):
         if self.kind == "camera":
             self.cap, f, self.msg = open_camera(int(self.src), *self.req)
         else:
-            self.cap = cv2.VideoCapture(self.src, cv2.CAP_FFMPEG)
+            self.cap = cv2.VideoCapture(self.src, cv2.CAP_FFMPEG, [
+                cv2.CAP_PROP_OPEN_TIMEOUT_MSEC, 4000,
+                cv2.CAP_PROP_READ_TIMEOUT_MSEC, 3000])
             ok, f = self.cap.read() if self.cap.isOpened() else (False, None)
             if not ok:
                 self.cap.release()
                 self.cap, f = None, None
-                self.msg = f"주소를 열지 못함: {self.src}"
+                self.msg = f"주소를 열지 못함: {self.src} (Larix 수신기 실행, 휴대폰 송출 시작, phone 경로를 확인하세요)"
             else:
                 self.msg = f"주소 열림: {self.src}, {f.shape[1]}x{f.shape[0]}"
         if self.cap is not None:
@@ -189,6 +191,10 @@ class LiveSource(threading.Thread):
     def close(self):
         self.running = False
         self.stop_record()
+        if self.kind == "stream" and self.is_alive():
+            self.join(timeout=6.0)       # read timeout 이후 닫아 FFmpeg read/release 경합 방지
+            if self.is_alive():
+                return
         if self.cap is not None:
             time.sleep(0.1)
             self.cap.release()

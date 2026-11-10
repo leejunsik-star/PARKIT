@@ -464,7 +464,8 @@ class Engine:
             # v4: 통로 차 접점 반 폭 보정. 기본은 판정 숫자의 차 폭(car_width_cm)의 반 (docs/36)
             self.vehicle_tracking = TrackingBridge(self.table, tracking_cfg,
                                                   "video" if self.all_files else "wall", names,
-                                                  contact_shift_cm=self.params(None)["car_width_cm"] / 2)
+                                                  contact_shift_cm=self.params(None)["car_width_cm"] / 2,
+                                                  normalize_slot_centers=any(c.cal.get("contact_mode") == "center" for c in self.cams))
 
     # ---------------- 준비
     def load_detector(self):
@@ -1327,19 +1328,22 @@ class OccApp:
         # 카메라 화면 (D1, D5)
         show = e.cams if self.view_idx < 0 else [e.cams[self.view_idx]]
         W, H = self.camv.avail()
-        cell_h = max(60, H // len(show))
-        tiles, self.layout, y = [], [], 0
-        for c in show:
+        cols = 2 if len(show) >= 3 else 1
+        rows = (len(show) + cols - 1) // cols
+        cell_w, cell_h = max(60, W // cols), max(60, H // rows)
+        tiles, self.layout = [], []
+        for index, c in enumerate(show):
+            x, y = (index % cols) * cell_w, (index // cols) * cell_h
             f = c.display if (e.view_all and c.display is not None) else c.frame
             if f is None or c.geom is None:
-                tw_ = min(W, int(cell_h * 16 / 9))
+                tw_ = min(cell_w, int(cell_h * 16 / 9))
                 tile = np.full((min(cell_h, int(tw_ * 9 / 16)), tw_, 3), 25, np.uint8)
                 msg = {"stopped": f"{c.name}: STOPPED", "offline": f"{c.name}: NO FRAME"}.get(c.state, f"{c.name}: waiting")
                 text(tile, msg, (12, 30), 0.7, (0, 200, 255), 2)
-                self.layout.append((c, 0, y, 1.0, 0, 0))
+                self.layout.append((c, x, y, 1.0, 0, 0))
             else:
                 fh, fw = f.shape[:2]
-                s = min(W / fw, cell_h / fh)
+                s = min(cell_w / fw, cell_h / fh)
                 tile = cv2.resize(f, (max(1, int(fw * s)), max(1, int(fh * s))), interpolation=cv2.INTER_AREA)
                 if (fw, fh) == tuple(c.geom.size):
                     draw_slots(tile, c.geom, st, s, thick=4 if startup else 2, show_zone=self.show_zone,
@@ -1349,15 +1353,11 @@ class OccApp:
                 text(tile, c.name, (8, 22), 0.6, (255, 255, 255), 1)
                 if c.source is not None and c.source.recording():
                     cv2.circle(tile, (tile.shape[1] - 20, 20), 8, (0, 0, 255), -1)
-                self.layout.append((c, 0, y, s, tile.shape[1], tile.shape[0]))
-            tiles.append(tile)
-            y += tile.shape[0]
-        tw = max(t.shape[1] for t in tiles)
-        canvas = np.full((sum(t.shape[0] for t in tiles), tw, 3), 25, np.uint8)
-        y = 0
-        for t in tiles:
-            canvas[y:y + t.shape[0], :t.shape[1]] = t
-            y += t.shape[0]
+                self.layout.append((c, x, y, s, tile.shape[1], tile.shape[0]))
+            tiles.append((x, y, tile))
+        canvas = np.full((rows * cell_h, cols * cell_w, 3), 25, np.uint8)
+        for x, y, tile in tiles:
+            canvas[y:y + tile.shape[0], x:x + tile.shape[1]] = tile
         self.camv.show(canvas, 1.0, (canvas.shape[1], canvas.shape[0]))
         # 평면도 (D2, 창 크기에 맞춰 다시 만든다)
         PW, PH = self.planv.avail()
@@ -1452,20 +1452,27 @@ class OccApp:
 
 # ---------------------------------------------------------------- 시작 창: 쓸 카메라 고르기
 
-MAX_WEBCAMS = 5               # 웹캠 0~4번을 찾아본다 (calibrate.py 시작 창과 같음)
+MAX_WEBCAMS = 8               # 웹캠·DroidCam 가상 카메라 0~7번
 THUMB_W = 240
 
 
 def calibrated_cameras(config_dir=CONFIG_DIR):
-    """보정한 카메라 목록: [(이름, 보정 파일 경로, 보정 내용)] (config/cam_*.json)."""
-    out = []
-    for p in sorted(glob.glob(os.path.join(config_dir, "cam_*.json"))):
-        try:
-            d = load_json(p)
-        except (OSError, ValueError):
-            continue
-        out.append((os.path.basename(p)[4:-5], p, d))
-    return out
+    """일반/v2 중 같은 카메라의 최근 저장 보정 하나를 고른다. 명시적 --run은 그대로 쓴다."""
+    selected = {}
+    for directory in (config_dir, os.path.join(config_dir, "v2")):
+        for p in sorted(glob.glob(os.path.join(directory, "cam_*.json"))):
+            try:
+                d = load_json(p)
+                from camera_contact import contact_mode
+                contact_mode(d)
+            except (OSError, ValueError):
+                continue
+            name = os.path.basename(p)[4:-5]
+            # Git checkout 시각이 아니라 실제 보정 저장 날짜를 우선한다.
+            key = (str(d.get("date", "")), os.path.getmtime(p))
+            if name not in selected or key > selected[name][0]:
+                selected[name] = (key, p, d)
+    return [(name, row[1], row[2]) for name, row in sorted(selected.items())]
 
 
 def web_available():
@@ -1477,6 +1484,9 @@ def web_available():
     if not os.path.exists(os.path.join(HERE, "web", "dist", "index.html")):
         return False, "web/dist 가 없습니다 (TRACKING.md의 웹 화면 빌드)"
     return True, "주소 http://127.0.0.1:8765"
+
+
+from camera_input import parse_source, validate_source, LARIX_INPUTS
 
 
 class CameraStart:
@@ -1499,7 +1509,8 @@ class CameraStart:
         self.web = web
         self.build(default_names)
         self.root.protocol("WM_DELETE_WINDOW", self.quit)
-        self.root.after(100, self.probe_all)
+        # 자동 USB 탐색은 macOS 연속성 카메라를 켜 Larix 송출을 방해할 수 있다.
+        self.root.after(100, self.refresh)
 
     def build(self, default_names):
         tk, ttk = self.tk, self.ttk
@@ -1528,27 +1539,26 @@ class CameraStart:
             rr = ttk.Frame(right)
             rr.pack(anchor="w", pady=(4, 0))
             var = tk.StringVar(value=str(int(src)) if webcam else str(src))
-            if webcam:
-                ttk.Label(rr, text="웹캠").pack(side="left")
-                cb = ttk.Combobox(rr, textvariable=var, values=[str(i) for i in range(MAX_WEBCAMS)], width=3,
-                                  state="readonly")
-                cb.pack(side="left", padx=4)
-                cb.bind("<<ComboboxSelected>>", lambda e: self.refresh())
-                ttk.Label(rr, text=f"번 (보정 파일에는 {int(src)}번)", foreground="#555").pack(side="left")
-            else:
-                ttk.Label(rr, text=f"입력: {src}").pack(side="left")
+            ttk.Label(rr, text="번호 / Larix 주소").pack(side="left")
+            cb = ttk.Combobox(rr, textvariable=var,
+                              values=[str(i) for i in range(MAX_WEBCAMS)] + LARIX_INPUTS, width=38)
+            cb.pack(side="left", padx=4)
+            cb.bind("<<ComboboxSelected>>", lambda e: self.refresh())
+            cb.bind("<FocusOut>", lambda e: self.refresh())
+            from camera_contact import MODE_LABELS, contact_mode
+            ttk.Label(right, text=MODE_LABELS[contact_mode(d)], foreground="#245a9a").pack(anchor="w")
             cal = d.get("calib_size", [1920, 1080])
             ttk.Label(right, text=f"감시 칸 {len(d.get('monitored', []))}개 · 보정 해상도 {cal[0]}x{cal[1]} · "
-                                  f"저장 {d.get('date', '?')}", foreground="#555").pack(anchor="w", pady=(4, 0))
+                                  f"저장 {d.get('date', '?')} · {os.path.basename(os.path.dirname(path))}/{os.path.basename(path)}", foreground="#555").pack(anchor="w", pady=(4, 0))
             state = ttk.Label(right, text="", foreground="#555")
             state.pack(anchor="w")
             self.rows[name] = {"use": use_var, "var": var, "webcam": webcam, "src": src, "path": path,
                                "size": cal, "canvas": c, "state": state}
         rr = ttk.Frame(r)
         rr.pack(fill="x", padx=8, pady=(2, 2))
-        ttk.Button(rr, text="웹캠 다시 찾기", command=self.probe_all).pack(side="left")
+        ttk.Button(rr, text="USB/연속성 웹캠 찾기 (Larix는 주소 선택)", command=self.probe_all).pack(side="left")
         self.save_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(rr, text="바꾼 웹캠 번호를 보정 파일에도 저장 (다음 실행에도 이 번호)",
+        ttk.Checkbutton(rr, text="바꾼 입력 번호·주소를 보정 파일에도 저장",
                         variable=self.save_var).pack(side="left", padx=10)
         rr = ttk.Frame(r)
         rr.pack(fill="x", padx=8, pady=(2, 2))
@@ -1596,8 +1606,9 @@ class CameraStart:
         for name, r in self.rows.items():
             c = r["canvas"]
             c.delete("all")
+            r["webcam"] = source_kind(parse_source(r["var"].get())) == "camera"
             if not r["webcam"]:
-                c.create_text(THUMB_W // 2, THUMB_W * 9 // 32, text="영상·rtsp 입력", fill="#bbb")
+                c.create_text(THUMB_W // 2, THUMB_W * 9 // 32, text="Larix / 네트워크 영상\n판정 시작 후 영상 수신", fill="#bbb")
                 r["state"].configure(text="")
                 continue
             i = int(r["var"].get())
@@ -1618,12 +1629,11 @@ class CameraStart:
             w.append("쓸 카메라를 하나 이상 고르세요.")
         used = {}
         for n, r in picks.items():
-            if r["webcam"]:
-                used.setdefault(int(r["var"].get()), []).append(n)
+            used.setdefault(parse_source(r["var"].get()), []).append(n)
         for i, ns in used.items():
             if len(ns) > 1:
                 w.append(f"웹캠 {i}번을 {', '.join(ns)}가 같이 씁니다. 서로 다른 웹캠을 고르세요.")
-            if self.found and not self.found.get(i):
+            if isinstance(i, int) and self.found and not self.found.get(i):
                 w.append(f"{', '.join(ns)}의 웹캠 {i}번이 연결돼 있지 않습니다. 시작하면 그 카메라는 '끊김'으로 나옵니다.")
         self.warn.configure(text="\n".join(w))
         return w
@@ -1640,14 +1650,16 @@ class CameraStart:
         entries = []
         for name, r in picks.items():
             e = {"config": r["path"], "width": int(r["size"][0]), "height": int(r["size"][1])}
-            if r["webcam"]:
-                s = int(r["var"].get())
-                e["source"] = s
-                if self.save_var.get() and s != int(r["src"]):
-                    d = load_json(r["path"])
-                    d["source"] = s
-                    save_json(r["path"], d)
-                    print(f"[판정] {name} 보정 파일의 웹캠 번호를 {r['src']} → {s}번으로 저장했습니다.")
+            try:
+                source = validate_source(r["var"].get(), allow_file=True)
+            except ValueError as exc:
+                self.mb.showerror("입력 주소", f"{name}: {exc}")
+                return
+            e["source"] = source
+            if self.save_var.get() and source != r["src"]:
+                d = load_json(r["path"])
+                d["source"] = source
+                save_json(r["path"], d)
             entries.append(e)
         self.result = entries
         self.web = bool(self.web_var.get())

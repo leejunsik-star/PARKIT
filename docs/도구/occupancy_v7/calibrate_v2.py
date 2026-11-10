@@ -148,6 +148,7 @@ class CalibModelV2(CalibModel):
                 for r in d.get("ref_points", []) if r["id"] in self.refs_all and not r.get("auto")]
         if not refs:
             return None, "원본 보정 파일에 가져올 기준점이 없습니다."
+        self.contact_mode = d.get("contact_mode", "ground")
         self.refs = refs
         self.active_ref = None
         self.hfov = float(d.get("intrinsics", {}).get("hfov_deg", self.hfov))
