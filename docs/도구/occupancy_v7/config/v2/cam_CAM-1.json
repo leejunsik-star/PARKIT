@@ -1,6 +1,6 @@
 {
  "name": "CAM-1",
- "source": 0,
+ "source": "rtsp://127.0.0.1:8554/phone1",
  "calib_size": [
   1920,
   1080

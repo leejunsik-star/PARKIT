@@ -57,3 +57,6 @@ desktop.ini
 .ipynb_checkpoints/
 .idea/
 .vscode/
+
+# OS별 가상환경은 각 컴퓨터에서 생성
+.venv*/

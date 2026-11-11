@@ -1,0 +1,23 @@
+{
+  "dataset_recipe": "M8",
+  "epochs_requested": 100,
+  "batch": 4,
+  "size": 640,
+  "width": 16,
+  "seed": 42,
+  "initialization": "random",
+  "device": "Tesla T4",
+  "torch_version": "2.11.0+cu130",
+  "manifest_sha256": "0698d612a7b9f15ff877552bb49eae00f34fac42982bedf894d367a9ccb80c47",
+  "code_sha256": {
+    "model.py": "0ba6e93db239a39aba59b8a198a58a6d84bb77bfbf40c8f0df609e8b7adeb71f",
+    "check.py": "802b2535f19740767ffbeae902e72696a4f544b32b0a440d55e58fbe58cb4ac1",
+    "calibrate.py": "ec0b5bdfe39beb7637c55076c7e70e1ad77c2aa579cda12e9688b94a23841fb9",
+    "report.py": "0f2760bee96a0555da49f02cf4c9847e20e3eab9c9b4db7de366a844d1d051f7",
+    "install_m8.py": "fd9fb66de40d26b38e9118e3a260df562d0ac1d8f8504ab8956df6e17f9e7f92",
+    "__init__.py": "fb630d95b3358445836fa5d192578b784bd3bf06a930c0634d650eb7e7d447d8",
+    "run.py": "5a3f19aefa462e92f6b5aac75b2aa514eb3232d39742917c065497ce7c568424",
+    "data.py": "6515b06f1a3fbb9c030be9ce7d2b79a701bca09c78c95d3c605353588e842799",
+    "inspect_checkpoint.py": "85c5d3fab43ef84ee9b22ca443802717f959ff92ecb682e44b0bbeaa30e66a49"
+  }
+}

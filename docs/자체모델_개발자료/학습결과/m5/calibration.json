@@ -1,0 +1,80 @@
+{
+  "split": "val",
+  "selection": "highest F1 on coarse confidence grid, NMS IoU 0.5",
+  "recommended_conf": 0.35,
+  "recommended_metrics": {
+    "conf": 0.35,
+    "precision": 0.9351535836177475,
+    "recall": 0.9448275862068966,
+    "f1": 0.9399656946826759,
+    "false_positive": 19,
+    "false_negative": 16
+  },
+  "grid": [
+    {
+      "conf": 0.25,
+      "precision": 0.8121387283236994,
+      "recall": 0.9689655172413794,
+      "f1": 0.8836477987421383,
+      "false_positive": 65,
+      "false_negative": 9
+    },
+    {
+      "conf": 0.35,
+      "precision": 0.9351535836177475,
+      "recall": 0.9448275862068966,
+      "f1": 0.9399656946826759,
+      "false_positive": 19,
+      "false_negative": 16
+    },
+    {
+      "conf": 0.45,
+      "precision": 0.9806201550387597,
+      "recall": 0.8724137931034482,
+      "f1": 0.9233576642335767,
+      "false_positive": 5,
+      "false_negative": 37
+    },
+    {
+      "conf": 0.55,
+      "precision": 0.9910714285714286,
+      "recall": 0.7655172413793103,
+      "f1": 0.8638132295719845,
+      "false_positive": 2,
+      "false_negative": 68
+    },
+    {
+      "conf": 0.65,
+      "precision": 1.0,
+      "recall": 0.6103448275862069,
+      "f1": 0.7580299785867237,
+      "false_positive": 0,
+      "false_negative": 113
+    },
+    {
+      "conf": 0.75,
+      "precision": 1.0,
+      "recall": 0.3413793103448276,
+      "f1": 0.5089974293059126,
+      "false_positive": 0,
+      "false_negative": 191
+    },
+    {
+      "conf": 0.85,
+      "precision": 1.0,
+      "recall": 0.06206896551724138,
+      "f1": 0.1168831168831169,
+      "false_positive": 0,
+      "false_negative": 272
+    },
+    {
+      "conf": 0.95,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "false_positive": 0,
+      "false_negative": 290
+    }
+  ],
+  "warning": "Validation selection only; not an independent test result."
+}

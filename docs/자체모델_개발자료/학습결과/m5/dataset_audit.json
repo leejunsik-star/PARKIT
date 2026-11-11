@@ -1,0 +1,22 @@
+{
+  "root": "dataset/split_2차",
+  "train_manifest": "train_M5.txt",
+  "training_selection": "Manifest exactly equals images/train; using --root with existing loader",
+  "splits": {
+    "train": {
+      "images": 158,
+      "boxes": 1126,
+      "empty": 81
+    },
+    "val": {
+      "images": 20,
+      "boxes": 290,
+      "empty": 3
+    },
+    "test": {
+      "images": 61,
+      "boxes": 420,
+      "empty": 36
+    }
+  }
+}

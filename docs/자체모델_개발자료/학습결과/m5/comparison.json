@@ -1,0 +1,314 @@
+{
+  "epochs_completed": 67,
+  "best_epoch": 65,
+  "weights": "runs/m5_20261030/best.pt",
+  "baseline": {
+    "precision": 0.3875862068965517,
+    "recall": 0.9689655172413794,
+    "mAP50": 0.8403014148407154,
+    "true_positive": 281,
+    "false_positive": 444,
+    "false_negative": 9,
+    "ground_truth": 290,
+    "confidence": 0.25,
+    "per_image": [
+      {
+        "image": "A_6_0001.jpg",
+        "false_negative": 0,
+        "false_positive": 9
+      },
+      {
+        "image": "A_6_0002.jpg",
+        "false_negative": 0,
+        "false_positive": 17
+      },
+      {
+        "image": "A_6_0003.jpg",
+        "false_negative": 0,
+        "false_positive": 6
+      },
+      {
+        "image": "B_5_0001.jpg",
+        "false_negative": 0,
+        "false_positive": 10
+      },
+      {
+        "image": "B_5_0002.jpg",
+        "false_negative": 1,
+        "false_positive": 8
+      },
+      {
+        "image": "B_5_0003.jpg",
+        "false_negative": 0,
+        "false_positive": 6
+      },
+      {
+        "image": "little_car_2_0001.jpg",
+        "false_negative": 0,
+        "false_positive": 11
+      },
+      {
+        "image": "little_car_2_0002.jpg",
+        "false_negative": 1,
+        "false_positive": 6
+      },
+      {
+        "image": "little_car_2_0003.jpg",
+        "false_negative": 0,
+        "false_positive": 4
+      },
+      {
+        "image": "little_car_2_0004.jpg",
+        "false_negative": 0,
+        "false_positive": 4
+      },
+      {
+        "image": "little_car_2_0005.jpg",
+        "false_negative": 0,
+        "false_positive": 2
+      },
+      {
+        "image": "s7_1.jpg",
+        "false_negative": 1,
+        "false_positive": 20
+      },
+      {
+        "image": "s7_2.jpg",
+        "false_negative": 3,
+        "false_positive": 19
+      },
+      {
+        "image": "s7_3.jpg",
+        "false_negative": 0,
+        "false_positive": 28
+      },
+      {
+        "image": "s7_4.jpg",
+        "false_negative": 0,
+        "false_positive": 34
+      },
+      {
+        "image": "s7_5.jpg",
+        "false_negative": 1,
+        "false_positive": 20
+      },
+      {
+        "image": "s7_6.jpg",
+        "false_negative": 2,
+        "false_positive": 24
+      },
+      {
+        "image": "x_0022.jpg",
+        "false_negative": 0,
+        "false_positive": 72
+      },
+      {
+        "image": "x_0023.jpg",
+        "false_negative": 0,
+        "false_positive": 80
+      },
+      {
+        "image": "x_0024.jpg",
+        "false_negative": 0,
+        "false_positive": 64
+      }
+    ]
+  },
+  "m5": {
+    "precision": 0.8121387283236994,
+    "recall": 0.9689655172413794,
+    "mAP50": 0.9713815037013219,
+    "true_positive": 281,
+    "false_positive": 65,
+    "false_negative": 9,
+    "ground_truth": 290,
+    "confidence": 0.25,
+    "per_image": [
+      {
+        "image": "A_6_0001.jpg",
+        "false_negative": 2,
+        "false_positive": 2
+      },
+      {
+        "image": "A_6_0002.jpg",
+        "false_negative": 3,
+        "false_positive": 5
+      },
+      {
+        "image": "A_6_0003.jpg",
+        "false_negative": 1,
+        "false_positive": 1
+      },
+      {
+        "image": "B_5_0001.jpg",
+        "false_negative": 0,
+        "false_positive": 5
+      },
+      {
+        "image": "B_5_0002.jpg",
+        "false_negative": 2,
+        "false_positive": 2
+      },
+      {
+        "image": "B_5_0003.jpg",
+        "false_negative": 0,
+        "false_positive": 1
+      },
+      {
+        "image": "little_car_2_0001.jpg",
+        "false_negative": 0,
+        "false_positive": 1
+      },
+      {
+        "image": "little_car_2_0002.jpg",
+        "false_negative": 1,
+        "false_positive": 1
+      },
+      {
+        "image": "little_car_2_0003.jpg",
+        "false_negative": 0,
+        "false_positive": 0
+      },
+      {
+        "image": "little_car_2_0004.jpg",
+        "false_negative": 0,
+        "false_positive": 0
+      },
+      {
+        "image": "little_car_2_0005.jpg",
+        "false_negative": 0,
+        "false_positive": 0
+      },
+      {
+        "image": "s7_1.jpg",
+        "false_negative": 0,
+        "false_positive": 10
+      },
+      {
+        "image": "s7_2.jpg",
+        "false_negative": 0,
+        "false_positive": 9
+      },
+      {
+        "image": "s7_3.jpg",
+        "false_negative": 0,
+        "false_positive": 6
+      },
+      {
+        "image": "s7_4.jpg",
+        "false_negative": 0,
+        "false_positive": 10
+      },
+      {
+        "image": "s7_5.jpg",
+        "false_negative": 0,
+        "false_positive": 6
+      },
+      {
+        "image": "s7_6.jpg",
+        "false_negative": 0,
+        "false_positive": 6
+      },
+      {
+        "image": "x_0022.jpg",
+        "false_negative": 0,
+        "false_positive": 0
+      },
+      {
+        "image": "x_0023.jpg",
+        "false_negative": 0,
+        "false_positive": 0
+      },
+      {
+        "image": "x_0024.jpg",
+        "false_negative": 0,
+        "false_positive": 0
+      }
+    ]
+  },
+  "calibration": {
+    "split": "val",
+    "selection": "highest F1 on coarse confidence grid, NMS IoU 0.5",
+    "recommended_conf": 0.35,
+    "recommended_metrics": {
+      "conf": 0.35,
+      "precision": 0.9351535836177475,
+      "recall": 0.9448275862068966,
+      "f1": 0.9399656946826759,
+      "false_positive": 19,
+      "false_negative": 16
+    },
+    "grid": [
+      {
+        "conf": 0.25,
+        "precision": 0.8121387283236994,
+        "recall": 0.9689655172413794,
+        "f1": 0.8836477987421383,
+        "false_positive": 65,
+        "false_negative": 9
+      },
+      {
+        "conf": 0.35,
+        "precision": 0.9351535836177475,
+        "recall": 0.9448275862068966,
+        "f1": 0.9399656946826759,
+        "false_positive": 19,
+        "false_negative": 16
+      },
+      {
+        "conf": 0.45,
+        "precision": 0.9806201550387597,
+        "recall": 0.8724137931034482,
+        "f1": 0.9233576642335767,
+        "false_positive": 5,
+        "false_negative": 37
+      },
+      {
+        "conf": 0.55,
+        "precision": 0.9910714285714286,
+        "recall": 0.7655172413793103,
+        "f1": 0.8638132295719845,
+        "false_positive": 2,
+        "false_negative": 68
+      },
+      {
+        "conf": 0.65,
+        "precision": 1.0,
+        "recall": 0.6103448275862069,
+        "f1": 0.7580299785867237,
+        "false_positive": 0,
+        "false_negative": 113
+      },
+      {
+        "conf": 0.75,
+        "precision": 1.0,
+        "recall": 0.3413793103448276,
+        "f1": 0.5089974293059126,
+        "false_positive": 0,
+        "false_negative": 191
+      },
+      {
+        "conf": 0.85,
+        "precision": 1.0,
+        "recall": 0.06206896551724138,
+        "f1": 0.1168831168831169,
+        "false_positive": 0,
+        "false_negative": 272
+      },
+      {
+        "conf": 0.95,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "false_positive": 0,
+        "false_negative": 290
+      }
+    ],
+    "warning": "Validation selection only; not an independent test result."
+  },
+  "live_adapter": "Passed real weight loading and inference, matches canonical Detector on one validation image",
+  "training_interrupted": true,
+  "interruption_reason": "No space left on device",
+  "camera_gui_tested": false,
+  "test_evaluated": false
+}

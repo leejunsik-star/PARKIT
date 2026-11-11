@@ -1,0 +1,112 @@
+{
+  "precision": 0.8121387283236994,
+  "recall": 0.9689655172413794,
+  "mAP50": 0.9713815037013219,
+  "true_positive": 281,
+  "false_positive": 65,
+  "false_negative": 9,
+  "ground_truth": 290,
+  "confidence": 0.25,
+  "per_image": [
+    {
+      "image": "A_6_0001.jpg",
+      "false_negative": 2,
+      "false_positive": 2
+    },
+    {
+      "image": "A_6_0002.jpg",
+      "false_negative": 3,
+      "false_positive": 5
+    },
+    {
+      "image": "A_6_0003.jpg",
+      "false_negative": 1,
+      "false_positive": 1
+    },
+    {
+      "image": "B_5_0001.jpg",
+      "false_negative": 0,
+      "false_positive": 5
+    },
+    {
+      "image": "B_5_0002.jpg",
+      "false_negative": 2,
+      "false_positive": 2
+    },
+    {
+      "image": "B_5_0003.jpg",
+      "false_negative": 0,
+      "false_positive": 1
+    },
+    {
+      "image": "little_car_2_0001.jpg",
+      "false_negative": 0,
+      "false_positive": 1
+    },
+    {
+      "image": "little_car_2_0002.jpg",
+      "false_negative": 1,
+      "false_positive": 1
+    },
+    {
+      "image": "little_car_2_0003.jpg",
+      "false_negative": 0,
+      "false_positive": 0
+    },
+    {
+      "image": "little_car_2_0004.jpg",
+      "false_negative": 0,
+      "false_positive": 0
+    },
+    {
+      "image": "little_car_2_0005.jpg",
+      "false_negative": 0,
+      "false_positive": 0
+    },
+    {
+      "image": "s7_1.jpg",
+      "false_negative": 0,
+      "false_positive": 10
+    },
+    {
+      "image": "s7_2.jpg",
+      "false_negative": 0,
+      "false_positive": 9
+    },
+    {
+      "image": "s7_3.jpg",
+      "false_negative": 0,
+      "false_positive": 6
+    },
+    {
+      "image": "s7_4.jpg",
+      "false_negative": 0,
+      "false_positive": 10
+    },
+    {
+      "image": "s7_5.jpg",
+      "false_negative": 0,
+      "false_positive": 6
+    },
+    {
+      "image": "s7_6.jpg",
+      "false_negative": 0,
+      "false_positive": 6
+    },
+    {
+      "image": "x_0022.jpg",
+      "false_negative": 0,
+      "false_positive": 0
+    },
+    {
+      "image": "x_0023.jpg",
+      "false_negative": 0,
+      "false_positive": 0
+    },
+    {
+      "image": "x_0024.jpg",
+      "false_negative": 0,
+      "false_positive": 0
+    }
+  ]
+}
