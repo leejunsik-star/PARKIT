@@ -35,7 +35,7 @@ class StateStore:
 def layout_from_table(table):
     return {"units": "cm", "coordinate_system": "top_left_x_right_y_down",
             "mat": {"width_cm": float(table.mat_size[0]), "height_cm": float(table.mat_size[1])},
-            "slots": [{"no": s.no, "row": s.row, "cell": s.cell.tolist(), "inner": s.inner.tolist()}
+            "slots": [{"no": s.no, "row": s.row, "cell": s.cell.tolist(), "inner": s.inner.tolist(), "entrance_y": s.entrance_y}
                       for s in table]}
 
 

@@ -8,10 +8,38 @@ import anyio
 
 
 def create_app(store, static_dir=None):
-    from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+    from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
     from fastapi.responses import FileResponse
     from fastapi.staticfiles import StaticFiles
     app = FastAPI(title='PARKIT 2D tracking', docs_url='/api/docs')
+
+    from navigation import Navigation
+    navigation = Navigation(store.layout)
+
+    @app.get('/api/navigation')
+    def navigation_layout():
+        return navigation.info()
+
+    @app.get('/api/route')
+    def route(vehicle_id: str, destination: int, session_id: str):
+        snap = store.read()
+        if snap.get('session_id') != session_id:
+            raise HTTPException(409, '서버가 재시작됐습니다. 내 차량을 다시 선택하세요')
+        if snap.get('engine_status') != 'running' or snap.get('publication_age_s', 99)>2:
+            raise HTTPException(409, '실시간 위치를 확인할 수 없습니다')
+        v = next((v for v in snap['vehicles'] if v['id']==vehicle_id), None)
+        age = (v or {}).get('age_s', 99) + (snap.get('publication_age_s',0) if snap.get('clock')=='wall' else 0)
+        if not v or v['status']!='TRACKED' or v.get('approx') or v.get('related') or age>navigation.config.get('prediction_s',.5):
+            raise HTTPException(409, '차량 위치/ID를 확인하는 중입니다')
+        slot = next((s for s in snap['slots'] if s['no']==destination), None)
+        if not slot or slot['status']!='EMPTY':
+            raise HTTPException(409, '목적지가 빈자리로 확인되지 않습니다. 다른 자리를 선택하세요')
+        try:
+            result = navigation.route([v['x_cm'],v['y_cm']],destination,v.get('slot'))
+        except (ValueError, KeyError) as exc:
+            raise HTTPException(422, str(exc))
+        return {**result, 'session_id':snap['session_id'], 'vehicle_id':vehicle_id,
+                'sequence':snap.get('sequence'), 'last_seen':v['last_seen']}
 
     @app.get('/api/layout')
     def layout():

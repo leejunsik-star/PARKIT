@@ -1,8 +1,11 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Positions, vehicleState, followBox, connectParking, visibleVehicles,
+import {Positions, vehicleState, connectParking, visibleVehicles,
   PARKING_FILTERS, shownByParking, initialParkingFilter, parkedHidden, approxLabel, myCarState} from './tracking.js';
 import './style.css';
+import MapViewport from './MapViewport.jsx';
+import useNavigation from './useNavigation.js';
+import {predictedPosition} from './navigation.js';
 
 const LABELS = {EMPTY:'빈자리', OCCUPIED:'주차 중', DYNAMIC_BLIND:'가림 / 확인 중', STATIC_BLIND:'감시 밖'};
 const TRACK_LABELS = {TRACKED:'추적 중', CANDIDATE:'확인 중인 후보', UNCERTAIN:'ID 연결 불확실', LOST:'일시적으로 놓침',
@@ -14,7 +17,8 @@ const saveFilter = v => { try { localStorage.setItem(FILTER_KEY, v); } catch { /
 
 function App() {
   const [layout,setLayout]=useState(null), [snapshot,setSnapshot]=useState(null), [connected,setConnected]=useState(false);
-  const [layoutError,setLayoutError]=useState(''), [selected,setSelected]=useState(null), [follow,setFollow]=useState(false);
+  const [layoutError,setLayoutError]=useState(''), [selected,setSelected]=useState(null);
+  const [selectedSession,setSelectedSession]=useState(null);
   const [now,setNow]=useState(performance.now());
   const [onlyMine,setOnlyMine]=useState(false);   // v4: 내 차만 보기
   const [savedFilter,setSavedFilter]=useState(loadFilter);   // v6: 보일 차량 (없으면 서버 설정)
@@ -50,18 +54,19 @@ function App() {
   const allVehicles=snapshot?.vehicles||[];
   const vehicle=allVehicles.find(v=>v.id===selected);
   const state=selected?vehicleState(vehicle,snapshot||{},receipt.current,now,connected):null;
-  // v7 내 차 후보 (docs/44): 섞였으면 후보 강조, 놓쳤고 이을 차가 하나면 자동으로 잇고, 여럿이면 고르게 한다
+  // 후보가 하나여도 사용자가 직접 확인한다. 안내 목적지는 ID 선택과 별도로 유지한다.
   const mc=myCarState(selected,snapshot,rejected);
-  const candSet=new Set(mc.mode==='mixed'||mc.mode==='pick'?mc.candidates:[]);
-  useEffect(()=>{
-    if(mc.mode==='auto'){setGuess(g=>({from:g?.from??selected,to:mc.next}));setSelected(mc.next);}
-  },[mc.mode,mc.next,selected]);
-  const pickMine=id=>{setSelected(id);setGuess(null);setRejected(new Set());setFollow(false);anchor.current=positions.current.at(id,now);};
+  const candSet=new Set(['mixed','pick','auto'].includes(mc.mode)?mc.candidates:[]);
+  const pickMine=id=>{setSelected(id);setSelectedSession(snapshot?.session_id);setGuess(null);setRejected(new Set());anchor.current=positions.current.at(id,now);};
+  const nav=useNavigation({selected,selectedSession,snapshot,connected,elapsed:Math.max(0,(now-receipt.current)/1000)});
   const guessed=guess&&selected===guess.to;
   const parkFilter=initialParkingFilter(savedFilter,snapshot?.tracking_config?.parked_vehicles);
   const byParking=shownByParking(allVehicles,parkFilter,snapshot?.slots);
+  if(nav.destination!=null&&vehicle&&!byParking.list.some(v=>v.id===selected)) {
+    byParking.list.push(vehicle);byParking.hidden=byParking.hidden.filter(v=>v.id!==selected);
+  }
   const slotStatus=no=>(snapshot?.slots||[]).find(s=>s.no===no)?.status;
-  const mineHidden=parkedHidden(vehicle,parkFilter,slotStatus);   // 내 차가 "보일 차량" 설정으로 숨겨짐
+  const mineHidden=nav.destination==null&&parkedHidden(vehicle,parkFilter,slotStatus);   // 내 차가 "보일 차량" 설정으로 숨겨짐
   const shown0=visibleVehicles(byParking.list,selected,onlyMine);
   const shown=onlyMine&&candSet.size?{list:byParking.list.filter(v=>v.id===selected||candSet.has(v.id)),mineMissing:false}:shown0;
   const mineOnly=onlyMine&&selected&&!shown.mineMissing;   // 지금 내 차만 그리는 중
@@ -72,9 +77,8 @@ function App() {
   const slots=new Map((snapshot?.slots||[]).map(s=>[s.no,s]));
   const counts=Object.fromEntries(Object.keys(LABELS).map(k=>[k,(snapshot?.slots||[]).filter(s=>s.status===k).length]));
   const position=vehicle && positions.current.at(vehicle.id,now);
-  if(position) anchor.current=position;
+  if(position && (!nav.destination || nav.active)) anchor.current=position;
   const mat=layout?.mat;
-  const view=mat ? (follow && anchor.current ? followBox(anchor.current,mat) : [0,0,mat.width_cm,mat.height_cm]) : [0,0,1,1];
   const choose=v=>pickMine(v.id);
   const carNo=id=>id.split('-').at(-1);
   const mcNotice=!selected?'':guessed?'내 차를 놓쳐서 가장 그럴듯한 차로 이어 붙였어요(추정). 왼쪽에서 맞는지 알려 주세요.'
@@ -96,12 +100,18 @@ function App() {
           {guessed&&<div className="guess-note">내 차(추정) · 다른 차와 엇갈린 뒤 이어 붙였어요. 맞나요?
             <div className="guess-btns"><button onClick={()=>{setGuess(null);setRejected(new Set());}}>맞아요</button>
             <button onClick={()=>{setRejected(r=>new Set([...r,guess.to]));setSelected(guess.from);setGuess(null);}}>아니에요</button></div></div>}
-          {(mc.mode==='mixed'||mc.mode==='pick')&&<div className="guess-note">{mc.mode==='mixed'?'다른 차와 엇갈려 내 차가 헷갈릴 수 있어요.':'내 차를 잠시 놓쳤어요. 근처에 내 차일 수 있는 차가 있어요.'} 내 차를 눌러 주세요.
+          {(['mixed','pick','auto'].includes(mc.mode))&&<div className="guess-note">{mc.mode==='mixed'?'다른 차와 엇갈려 내 차가 헷갈릴 수 있어요.':'내 차를 잠시 놓쳤어요. 근처에 내 차일 수 있는 차가 있어요.'} 내 차를 눌러 주세요.
             <div className="guess-btns">{mc.candidates.map(id=><button key={id} onClick={()=>pickMine(id)}>차량 {carNo(id)}{id===selected?' (지금 선택)':''}</button>)}</div></div>}
           {mineHidden&&<p className="caption parked-note">{vehicle.slot!=null?`${vehicle.slot}번 칸에 `:''}주차되어 지도에서 숨겼습니다 ({filterLabel}).</p>}
-          <button className="primary" disabled={!position||state==='REMOVED'} onClick={()=>setFollow(!follow)}>{follow?'전체 주차장 보기':'내 차량 따라가기'}</button>
           <button aria-pressed={onlyMine} onClick={()=>setOnlyMine(!onlyMine)}>{onlyMine?'다른 차량도 보기':'내 차만 보기'}</button>
-          <button onClick={()=>{setSelected(null);setFollow(false);setOnlyMine(false);anchor.current=null;}}>선택 해제</button></> : <><h2>차량을 선택하세요</h2><p>회색 차량 아이콘을 누르면<br/>내 차량으로 선택할 수 있어요.</p></>}
+          <button onClick={()=>{nav.cancel();setSelected(null);setOnlyMine(false);anchor.current=null;}}>선택 해제</button></> : <><h2>차량을 선택하세요</h2><p>회색 차량 아이콘을 누르면<br/>내 차량으로 선택할 수 있어요.</p></>}
+        </section>
+        <section className="navigation-panel"><div className="eyebrow">주차 안내</div>
+          <h2>{nav.destination!=null?`${nav.destination}번 자리로 안내`:'빈자리를 선택하세요'}</h2>
+          <p role="status">{nav.message}</p>
+          {nav.active&&nav.route&&<p>남은 경로 <strong>{nav.route.distance_cm.toFixed(1)} cm</strong></p>}
+          {nav.destination!=null&&<button onClick={nav.cancel}>안내 취소</button>}
+          <p className="caption">목적지는 예약되지 않습니다. 경로는 설정된 통로를 따르며 다른 차량·장애물 회피와 주차 조향은 제공하지 않습니다.</p>
         </section>
         <section className="parking-filter"><div className="eyebrow">보일 차량</div>
           <div className="choices" role="radiogroup" aria-label="보일 차량">
@@ -114,16 +124,24 @@ function App() {
       </aside>
       <section className="map-panel">
         {snapshot?.mode==='synthetic'&&<div className="notice">합성 데모 · 실제 CCTV 탐지 결과가 아닙니다.</div>}
-        <div className="map-title"><div><span className="eyebrow">LIVE MAP</span><h2>{follow?'내 차량 중심':mineOnly?'내 차량만':'전체 주차장'}</h2></div><div className="north">↑ N <span>지도 위쪽 고정</span></div></div>
-        {follow&&<button className="back" onClick={()=>setFollow(false)}>← 전체 주차장 보기</button>}
+        <div className="map-title"><div><span className="eyebrow">LIVE MAP</span><h2>{mineOnly?'내 차량만':'전체 주차장'}</h2></div><div className="north">↑ N <span>지도 위쪽 고정</span></div></div>
         {(!live||mcNotice||state==='LOST'||state==='UNCERTAIN'||state==='REMOVED')&&<div className="notice" role="status">{!live?'실시간 위치를 확인할 수 없습니다. 마지막 수신 정보를 표시합니다.':mcNotice||TRACK_LABELS[state]}</div>}
         {mineHidden?<div className="notice" role="status">내 차량이 {vehicle.slot!=null?`${vehicle.slot}번 칸에 `:''}주차되어 지도에서 숨겼습니다. 보려면 왼쪽 "보일 차량"에서 전체 차량을 고르세요.</div>
           :onlyMine&&selected&&shown.mineMissing&&<div className="notice" role="status">내 차량을 찾을 수 없어 모든 차량을 표시합니다. 내 차량을 다시 선택하세요.</div>}
-        {layout?<svg className="parking-map" viewBox={view.join(' ')} preserveAspectRatio="xMidYMid meet" aria-label="차량을 선택할 수 있는 주차장 평면도">
+        {layout?<MapViewport mat={mat}>
           <rect width={mat.width_cm} height={mat.height_cm} fill="#edf0f2"/>
-          {layout.slots.map(s=><g key={s.no}><polygon points={points(s.cell)} className="slot-cell"/><polygon points={points(s.inner)} className={`slot ${slots.get(s.no)?.status||'STATIC_BLIND'}`} opacity={live?1:.5}/><text x={s.cell.reduce((a,p)=>a+p[0],0)/s.cell.length} y={s.cell.reduce((a,p)=>a+p[1],0)/s.cell.length} className="slot-number">{s.no}</text></g>)}
+          {layout.slots.map(s=><g key={s.no} role="button" tabIndex={0} aria-label={`${s.no}번 ${LABELS[slots.get(s.no)?.status]||'확인 불가'}`} aria-pressed={nav.destination===s.no}
+            onClick={()=>{if(live)nav.choose(s.no);}} onKeyDown={e=>{if((e.key==='Enter'||e.key===' ')&&live){e.preventDefault();nav.choose(s.no);}}}
+            className={nav.destination===s.no?'destination-slot':'selectable-slot'}><polygon points={points(s.cell)} className="slot-cell"/><polygon points={points(s.inner)} className={`slot ${slots.get(s.no)?.status||'STATIC_BLIND'}`} opacity={live?1:.5}/><text x={s.cell.reduce((a,p)=>a+p[0],0)/s.cell.length} y={s.cell.reduce((a,p)=>a+p[1],0)/s.cell.length} className="slot-number">{s.no}</text></g>)}
+          <defs><marker id="nav-arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#216bea"/></marker></defs>
+          {nav.route&&<polyline markerMid="url(#nav-arrow)" markerEnd="url(#nav-arrow)" className={`navigation-route ${nav.active?'':'paused'}`} points={points(nav.route.points)} fill="none"/>}
+          {nav.route&&<g className="destination-marker" transform={`translate(${nav.route.points.at(-1).join(' ')})`}><circle r="1.2"/><text y="-2">목적지 {nav.destination}</text></g>}
           {shown.list.map(v=>{
-            const p=positions.current.at(v.id,now);if(!p)return null;
+            let p=positions.current.at(v.id,now);if(!p)return null;
+            if(v.id===selected&&nav.destination){
+              if(!nav.active&&anchor.current)p=anchor.current;
+              else if(nav.state==='ESTIMATING')p=predictedPosition(v,v.age_s+(snapshot.clock==='wall'?(snapshot.publication_age_s||0)+(now-receipt.current)/1000:0),nav.config?.prediction_s);
+            }
             const st=vehicleState(v,snapshot,receipt.current,now,connected), approx=approxLabel(v), uncertain=st!=='TRACKED'||!!approx;   // v6: 위치 대략도 점선 (docs/43)
             const cand=candSet.has(v.id);   // v7: 내 차 후보 (docs/44)
             return <g key={v.id} transform={`translate(${p.x} ${p.y})`} role="button" tabIndex={0} aria-label={`차량 ${v.id.split('-').at(-1)} ${TRACK_LABELS[st]}${cand?' 내 차 후보':''}`} aria-pressed={v.id===selected} onClick={()=>choose(v)} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();choose(v);}}} className={`car ${v.id===selected?'selected':''} ${uncertain?'uncertain':''} ${cand?'candidate':''}`}>
@@ -141,7 +159,7 @@ function App() {
             </g>;
           })}
           {selected&&mc.mode==='lost'&&anchor.current&&<g className="last-seen" transform={`translate(${anchor.current.x} ${anchor.current.y})`}><circle r="3.2"/><text y="-3.8">마지막 위치</text></g>}
-        </svg>:<div className="loading">{layoutError||'주차장 정보를 불러오는 중…'}</div>}
+        </MapViewport>:<div className="loading">{layoutError||'주차장 정보를 불러오는 중…'}</div>}
         <div className="legend">{Object.entries(LABELS).map(([k,v])=><span key={k}><i className={k}/>{v}</span>)}<span><i className="chosen"/>선택 차량</span><span><i className="approx-key"/>점선 = 위치 대략</span>{candSet.size>0&&<span><i className="cand-key"/>내 차 후보</span>}{mineOnly&&<span>다른 차량 숨김</span>}{parkFilter!=='show'&&<span>{filterLabel}{hiddenCount?` · ${hiddenCount}대`:''}</span>}</div>
         <div className="map-footer"><span>{mat?`${mat.width_cm} × ${mat.height_cm} cm`:'매트 좌표계'} · 아이콘은 이동 방향으로 회전합니다. 정지 시 마지막 방향 유지 (차체 방향 아님).</span><span>{snapshot?`갱신 ${new Date(snapshot.updated_at*1000).toLocaleTimeString('ko-KR')}`:'대기 중'}</span></div>
       </section>

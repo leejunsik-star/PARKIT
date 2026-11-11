@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Positions, vehicleState, followBox, connectParking, visibleVehicles,
+import {Positions, vehicleState, connectParking, visibleVehicles,
   PARKING_FILTERS, shownByParking, initialParkingFilter, parkedHidden, myCarState} from './tracking.js';
 
 test('interpolates, never extrapolates, heartbeat does not restart movement',()=>{
@@ -20,12 +20,6 @@ test('lost selected ID never resolves to another car; removed selected ID stays 
  assert.equal(vehicleState(v,state,0,3000,true),'STALE');
  assert.equal(vehicleState({...v,status:'REMOVED'},state,0,100,true),'REMOVED');
  assert.equal(vehicleState(v,{...state,engine_status:'paused'},0,100,true),'PAUSED');
-});
-test('follow keeps the selected car at viewport center, including mat edge',()=>{
- const mat={width_cm:78.3,height_cm:55.4};
- for(const p of [{x:1,y:2},{x:40,y:30},{x:78,y:55}]){
-  const [x,y,w,h]=followBox(p,mat);assert.ok(Math.abs((p.x-x)/w-.5)<1e-10);assert.ok(Math.abs((p.y-y)/h-.5)<1e-10);
- }
 });
 test('WebSocket close reconnects and immediately accepts complete new state; cleanup stops retry',()=>{
  const sockets=[],tasks=new Map(),connections=[],states=[];let next=0;

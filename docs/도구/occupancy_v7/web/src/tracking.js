@@ -81,11 +81,6 @@ export function initialParkingFilter(saved, serverDefault) {
   return ok(saved) ? saved : ok(serverDefault) ? serverDefault : 'show';
 }
 
-export function followBox(position, mat) {
-  const w = mat.width_cm * .55, h = mat.height_cm * .55;
-  return [position.x - w/2, position.y - h/2, w, h];
-}
-
 export function connectParking({url, onState, onConnection, WebSocketImpl=WebSocket,
                                 schedule=setTimeout, cancel=clearTimeout, clock=()=>performance.now()}) {
   let socket, timer, watchdog, stopped=false, attempts=0, lastMessage=0;

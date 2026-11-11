@@ -400,7 +400,7 @@ class VehicleTracker:
             if now > tr.related_until:
                 tr.related = set()
             out.append({"id": tr.id, "approx": approx, "related": related, "first_seen": tr.first_seen, "x_cm": tr.position[0], "y_cm": tr.position[1],
-                        "observed_x_cm": tr.raw[0], "observed_y_cm": tr.raw[1],
+                        "velocity_cm_s": list(tr.velocity), "observed_x_cm": tr.raw[0], "observed_y_cm": tr.raw[1],
                         "status": tr.status, "last_seen": tr.last_seen, "age_s": age,
                         "heading": None, "motion_heading": tr.motion_heading,
                         "heading_source": "motion" if tr.motion_heading is not None else "unknown", "slot": tr.slot, "kind": tr.kind,

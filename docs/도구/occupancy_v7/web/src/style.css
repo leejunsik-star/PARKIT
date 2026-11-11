@@ -18,3 +18,13 @@
 .guess-note{background:#fff3d8;color:#7a5512;font-size:12px;line-height:1.6;padding:10px;border-radius:8px;margin-top:10px}
 .guess-btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .selection .guess-btns button{display:inline-block;width:auto;margin-top:0;padding:7px 10px;font-size:12px}
+/* 내비게이션과 지도 탐색: 추론 좌표는 변경하지 않는다. */
+.parking-map{touch-action:none;user-select:none;cursor:grab;overflow:hidden}.parking-map:active{cursor:grabbing}
+.map-controls{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin:12px 0}.map-controls span{font-size:11px;color:#687c89}
+.navigation-panel{padding:20px 0;border-bottom:1px solid #dce3e7}.navigation-panel p{font-size:13px;line-height:1.6}.navigation-panel .caption{font-size:11px}
+.selectable-slot{cursor:pointer}.destination-slot .slot{stroke:#155eef;stroke-width:.65}.destination-slot .slot-number{font-weight:bold;fill:#134cac}
+.navigation-route{stroke:#216bea;stroke-width:.65;stroke-linejoin:round;stroke-linecap:round;pointer-events:none}.navigation-route.paused{stroke:#7a8a96;stroke-dasharray:1 .7}
+.destination-marker{pointer-events:none}.destination-marker circle{fill:#216bea;stroke:white;stroke-width:.3}.destination-marker text{font-size:1.8px;fill:#164ab0;text-anchor:middle}
+@media(max-width:850px){.navigation-panel{grid-column:1/-1}}
+.selectable-slot,.destination-slot{outline:none}
+.selectable-slot:focus-visible .slot,.destination-slot:focus-visible .slot{stroke:#134cac;stroke-width:.55}

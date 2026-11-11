@@ -60,3 +60,7 @@ desktop.ini
 
 # OS별 가상환경은 각 컴퓨터에서 생성
 .venv*/
+
+# v7 웹지도 빌드: 다른 컴퓨터에서도 Node 없이 실행
+!docs/도구/occupancy_v7/web/dist/
+!docs/도구/occupancy_v7/web/dist/**
