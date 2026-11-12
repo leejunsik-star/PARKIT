@@ -94,6 +94,9 @@ def create_app(store, static_dir=None):
         @app.get('/')
         def instructions():
             return {"message": "Build web/ with npm ci && npm run build, then restart; or use Vite on port 5173."}
+    install_routes = getattr(store, 'install_routes', None)
+    if install_routes is not None:
+        install_routes(app, public)
     return app
 
 

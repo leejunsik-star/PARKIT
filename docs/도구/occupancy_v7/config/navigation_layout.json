@@ -1,8 +1,8 @@
 {
-  "description": "현재 78.3x55.4cm 매트의 가정한 통로. 실제 주행 가능 여부 확인 후 수정. 오른쪽 연결은 미설정.",
+  "description": "현재 78.3x55.4cm 매트의 가정한 통로. 실제 주행 가능 여부 확인 후 수정. 모든 통로는 양방향.",
   "mat": [78.3, 55.4],
   "nodes": {"upper_left": [3, 14.6], "upper_right": [72, 14.6], "lower_left": [3, 41.85], "lower_right": [72, 41.85]},
-  "edges": [["upper_left", "upper_right"], ["upper_left", "lower_left"], ["lower_left", "lower_right"]],
+  "edges": [["upper_left", "upper_right", "bidirectional"], ["upper_left", "lower_left", "bidirectional"], ["lower_left", "lower_right", "bidirectional"], ["upper_right", "lower_right", "bidirectional"]],
   "max_snap_cm": 6,
   "arrival_cm": 1.5,
   "prediction_s": 0.5,

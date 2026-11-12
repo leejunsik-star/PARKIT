@@ -24,6 +24,14 @@ class NavigationTests(unittest.TestCase):
         for a,b in zip(r['points'],r['points'][1:]): self.assertTrue(self.nav.clear(a,b))
         self.assertEqual(self.nav.route([60,14.6],1)['points'][0],[60,14.6])
 
+    def test_right_connection_to_slot_56(self):
+        route = self.nav.route([67, 14.6], 56)
+        self.assertIn([72, 14.6], route['points'])
+        self.assertIn([72, 41.85], route['points'])
+        self.assertNotIn([3, 14.6], route['points'])
+        reverse = self.nav.route([72, 41.85], 1)
+        self.assertIn([72, 14.6], reverse['points'])
+
     def test_all_slots_reachable(self):
         for no in self.nav.slots:
             r=self.nav.route([20,14.6],no)

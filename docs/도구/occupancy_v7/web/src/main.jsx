@@ -3,11 +3,14 @@ import {createRoot} from 'react-dom/client';
 import {Positions, vehicleState, connectParking, visibleVehicles,
   PARKING_FILTERS, shownByParking, initialParkingFilter, parkedHidden, approxLabel, myCarState} from './tracking.js';
 import './style.css';
+import AdminApp from './AdminApp.jsx';
+import BlindGroupSummary from './BlindGroupSummary.jsx';
 import MapViewport from './MapViewport.jsx';
 import useNavigation from './useNavigation.js';
 import {predictedPosition} from './navigation.js';
 
 const LABELS = {EMPTY:'빈자리', OCCUPIED:'주차 중', DYNAMIC_BLIND:'가림 / 확인 중', STATIC_BLIND:'감시 밖'};
+const ESTIMATE_LABELS = {INFERRED_EMPTY:'빈자리 추정', INFERRED_OCCUPIED:'점유 추정'};
 const TRACK_LABELS = {TRACKED:'추적 중', CANDIDATE:'확인 중인 후보', UNCERTAIN:'ID 연결 불확실', LOST:'일시적으로 놓침',
   REMOVED:'추적 종료 · 차량을 다시 선택하세요', DISCONNECTED:'연결 끊김 · 마지막 위치', STALE:'업데이트 지연 · 마지막 위치', PAUSED:'분석 정지 · 마지막 위치'};
 const points = coords => coords.map(p=>p.join(',')).join(' ');
@@ -75,6 +78,10 @@ function App() {
   const chooseFilter=k=>{setSavedFilter(k);saveFilter(k);};
   const live=connected && snapshot && snapshot.publication_age_s+(now-receipt.current)/1000<2 && snapshot.engine_status==='running';
   const slots=new Map((snapshot?.slots||[]).map(s=>[s.no,s]));
+  const slotDisplay = no => {
+    const estimate = live ? snapshot?.blind_slot_estimates?.[no] : null;
+    return (estimate !== 'POSSIBLY_EMPTY' && estimate) || slots.get(no)?.status || 'STATIC_BLIND';
+  };
   const counts=Object.fromEntries(Object.keys(LABELS).map(k=>[k,(snapshot?.slots||[]).filter(s=>s.status===k).length]));
   const position=vehicle && positions.current.at(vehicle.id,now);
   if(position && (!nav.destination || nav.active)) anchor.current=position;
@@ -123,16 +130,12 @@ function App() {
         <p className="footnote">지도 위치는 탐지 상자의 접점을 이용한 근사치입니다. 차량 ID는 위치 기반 추정이며, 교차·가림 때 연결이 끊길 수 있습니다.</p>
       </aside>
       <section className="map-panel">
-        {snapshot?.mode==='synthetic'&&<div className="notice">합성 데모 · 실제 CCTV 탐지 결과가 아닙니다.</div>}
         <div className="map-title"><div><span className="eyebrow">LIVE MAP</span><h2>{mineOnly?'내 차량만':'전체 주차장'}</h2></div><div className="north">↑ N <span>지도 위쪽 고정</span></div></div>
-        {(!live||mcNotice||state==='LOST'||state==='UNCERTAIN'||state==='REMOVED')&&<div className="notice" role="status">{!live?'실시간 위치를 확인할 수 없습니다. 마지막 수신 정보를 표시합니다.':mcNotice||TRACK_LABELS[state]}</div>}
-        {mineHidden?<div className="notice" role="status">내 차량이 {vehicle.slot!=null?`${vehicle.slot}번 칸에 `:''}주차되어 지도에서 숨겼습니다. 보려면 왼쪽 "보일 차량"에서 전체 차량을 고르세요.</div>
-          :onlyMine&&selected&&shown.mineMissing&&<div className="notice" role="status">내 차량을 찾을 수 없어 모든 차량을 표시합니다. 내 차량을 다시 선택하세요.</div>}
         {layout?<MapViewport mat={mat}>
           <rect width={mat.width_cm} height={mat.height_cm} fill="#edf0f2"/>
-          {layout.slots.map(s=><g key={s.no} role="button" tabIndex={0} aria-label={`${s.no}번 ${LABELS[slots.get(s.no)?.status]||'확인 불가'}`} aria-pressed={nav.destination===s.no}
+          {layout.slots.map(s=><g key={s.no} role="button" tabIndex={0} aria-label={`${s.no}번 ${ESTIMATE_LABELS[slotDisplay(s.no)] || LABELS[slotDisplay(s.no)]}`} aria-pressed={nav.destination===s.no}
             onClick={()=>{if(live)nav.choose(s.no);}} onKeyDown={e=>{if((e.key==='Enter'||e.key===' ')&&live){e.preventDefault();nav.choose(s.no);}}}
-            className={nav.destination===s.no?'destination-slot':'selectable-slot'}><polygon points={points(s.cell)} className="slot-cell"/><polygon points={points(s.inner)} className={`slot ${slots.get(s.no)?.status||'STATIC_BLIND'}`} opacity={live?1:.5}/><text x={s.cell.reduce((a,p)=>a+p[0],0)/s.cell.length} y={s.cell.reduce((a,p)=>a+p[1],0)/s.cell.length} className="slot-number">{s.no}</text></g>)}
+            className={nav.destination===s.no?'destination-slot':'selectable-slot'}><polygon points={points(s.cell)} className="slot-cell"/><polygon points={points(s.inner)} className={`slot ${slotDisplay(s.no)}`} opacity={live?1:.5}/><text x={s.cell.reduce((a,p)=>a+p[0],0)/s.cell.length} y={s.cell.reduce((a,p)=>a+p[1],0)/s.cell.length} className="slot-number">{s.no}</text></g>)}
           <defs><marker id="nav-arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#216bea"/></marker></defs>
           {nav.route&&<polyline markerMid="url(#nav-arrow)" markerEnd="url(#nav-arrow)" className={`navigation-route ${nav.active?'':'paused'}`} points={points(nav.route.points)} fill="none"/>}
           {nav.route&&<g className="destination-marker" transform={`translate(${nav.route.points.at(-1).join(' ')})`}><circle r="1.2"/><text y="-2">목적지 {nav.destination}</text></g>}
@@ -160,10 +163,15 @@ function App() {
           })}
           {selected&&mc.mode==='lost'&&anchor.current&&<g className="last-seen" transform={`translate(${anchor.current.x} ${anchor.current.y})`}><circle r="3.2"/><text y="-3.8">마지막 위치</text></g>}
         </MapViewport>:<div className="loading">{layoutError||'주차장 정보를 불러오는 중…'}</div>}
-        <div className="legend">{Object.entries(LABELS).map(([k,v])=><span key={k}><i className={k}/>{v}</span>)}<span><i className="chosen"/>선택 차량</span><span><i className="approx-key"/>점선 = 위치 대략</span>{candSet.size>0&&<span><i className="cand-key"/>내 차 후보</span>}{mineOnly&&<span>다른 차량 숨김</span>}{parkFilter!=='show'&&<span>{filterLabel}{hiddenCount?` · ${hiddenCount}대`:''}</span>}</div>
+        {snapshot?.mode==='synthetic'&&<div className="notice">합성 데모 · 실제 CCTV 탐지 결과가 아닙니다.</div>}
+        {(!live||mcNotice||state==='LOST'||state==='UNCERTAIN'||state==='REMOVED')&&<div className="notice" role="status">{!live?'실시간 위치를 확인할 수 없습니다. 마지막 수신 정보를 표시합니다.':mcNotice||TRACK_LABELS[state]}</div>}
+        {mineHidden?<div className="notice" role="status">내 차량이 {vehicle.slot!=null?`${vehicle.slot}번 칸에 `:''}주차되어 지도에서 숨겼습니다. 보려면 왼쪽 "보일 차량"에서 전체 차량을 고르세요.</div>
+          :onlyMine&&selected&&shown.mineMissing&&<div className="notice" role="status">내 차량을 찾을 수 없어 모든 차량을 표시합니다. 내 차량을 다시 선택하세요.</div>}
+        {live && <BlindGroupSummary groups={snapshot.blind_group_estimates}/>}
+        <div className="legend">{Object.entries(Object.keys(snapshot?.blind_slot_estimates || {}).length ? {...LABELS,...ESTIMATE_LABELS} : LABELS).map(([k,v])=><span key={k}><i className={k}/>{v}</span>)}<span><i className="chosen"/>선택 차량</span><span><i className="approx-key"/>점선 = 위치 대략</span>{candSet.size>0&&<span><i className="cand-key"/>내 차 후보</span>}{mineOnly&&<span>다른 차량 숨김</span>}{parkFilter!=='show'&&<span>{filterLabel}{hiddenCount?` · ${hiddenCount}대`:''}</span>}</div>
         <div className="map-footer"><span>{mat?`${mat.width_cm} × ${mat.height_cm} cm`:'매트 좌표계'} · 아이콘은 이동 방향으로 회전합니다. 정지 시 마지막 방향 유지 (차체 방향 아님).</span><span>{snapshot?`갱신 ${new Date(snapshot.updated_at*1000).toLocaleTimeString('ko-KR')}`:'대기 중'}</span></div>
       </section>
     </div>
   </main>;
 }
-createRoot(document.getElementById('root')).render(<App/>);
+createRoot(document.getElementById('root')).render(location.pathname.replace(/\/$/, '') === '/admin' ? <AdminApp/> : <App/>);
